@@ -311,24 +311,123 @@
 
   .sidebar-list::-webkit-scrollbar, .content::-webkit-scrollbar { width: 5px; }
   .sidebar-list::-webkit-scrollbar-thumb, .content::-webkit-scrollbar-thumb { background: #c5d8ea; border-radius: 99px; }
+
+  /* ── 移动端汉堡按钮 ── */
+  .hamburger {
+    display: none; width: 36px; height: 36px; border: none;
+    background: rgba(255,255,255,.15); border-radius: 8px; cursor: pointer;
+    flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    padding: 0;
+  }
+  .hamburger span { display: block; width: 20px; height: 2px; background: #fff; border-radius: 1px; transition: all .2s; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150; }
+
+  /* ── 平板适配 ── */
+  @media (max-width: 1024px) {
+    .grid { grid-template-columns: 1fr; }
+    .topbar { padding: 12px 16px; }
+    .search-input { width: 160px; }
+  }
+
+  /* ── 手机适配 ── */
+  @media (max-width: 768px) {
+    .hamburger { display: flex; }
+    .topbar { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
+    .topbar-left { gap: 10px; }
+    .topbar h1 { font-size: 0.95rem; }
+    .topbar-right { width: 100%; justify-content: flex-end; gap: 8px; }
+    .search-input { width: 120px; font-size: 0.75rem; padding: 5px 10px; }
+    .view-toggle { gap: 2px; }
+    .view-btn { padding: 4px 8px; font-size: 0.7rem; }
+
+    /* 侧边栏 → 抽屉 */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: 280px; z-index: 160;
+      transform: translateX(-100%); transition: transform .3s ease;
+      box-shadow: 2px 0 20px rgba(0,0,0,.15);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.show { display: block; }
+
+    .main-wrap { flex-direction: column; }
+    .content { padding: 0; }
+
+    .detail-header { padding: 16px 14px 14px; position: static; }
+    .dh-row1 { flex-wrap: wrap; gap: 6px; }
+    .dh-name { font-size: 1.15rem; }
+    .dh-metrics-wrap { flex-direction: column; }
+    .dh-group { border-right: none !important; border-bottom: 1px solid var(--soft-border); }
+    .dh-group:last-child { border-bottom: none; }
+
+    .timeline { padding: 16px 14px 30px; }
+    .timeline-title { font-size: 0.72rem; margin-bottom: 12px; }
+    .tl-card { padding: 12px 14px; }
+    .tl-section-content { font-size: 0.78rem; }
+
+    .overview-view { padding: 14px 12px 30px; }
+    .overview-title { font-size: 0.72rem; }
+    .grid { grid-template-columns: 1fr; gap: 10px; }
+    .ocard { padding: 14px; }
+    .ocard-name { font-size: 0.9rem; }
+    .ocard-metrics { flex-wrap: wrap; }
+    .ocard-metric { min-width: 33.33%; padding: 6px 8px; }
+    .ocard-metric .val { font-size: 0.82rem; }
+
+    .compare-view { padding: 14px 10px 30px; }
+    .compare-header { margin-bottom: 12px; }
+    .compare-selects { flex-direction: column; align-items: stretch; }
+    .compare-select { min-width: unset; width: 100%; }
+    .compare-table { font-size: 0.75rem; }
+    .compare-table th, .compare-table td { padding: 8px 10px; }
+
+    .ss-body { grid-template-columns: 1fr; gap: 10px; }
+    .ss-header { padding: 8px 12px; }
+    .ss-title { font-size: 0.8rem; }
+    .ss-section p { font-size: 0.75rem; }
+    .ss-body { padding: 10px 12px; }
+
+    .sf-btn { padding: 4px 8px; font-size: 0.65rem; }
+    .sidebar-filter { padding: 8px 10px; }
+
+    footer { padding: 10px; font-size: 0.65rem; }
+  }
+
+  /* ── 小屏手机 ── */
+  @media (max-width: 400px) {
+    .topbar h1 { font-size: 0.85rem; }
+    .search-input { width: 100px; }
+    .view-btn { padding: 3px 6px; font-size: 0.65rem; }
+    .dh-name { font-size: 1rem; }
+    .dh-metric { padding: 7px 5px; }
+    .dh-metric .val { font-size: 0.8rem; }
+    .ocard-metric .val { font-size: 0.75rem; }
+    .compare-table { font-size: 0.7rem; }
+    .compare-table th, .compare-table td { padding: 6px 8px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-left">
-    <h1>📋 大消费行业跟踪看板</h1>
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+    <h1>大消费行业跟踪看板</h1>
     <span class="badge" id="total-badge"></span>
   </div>
   <div class="topbar-right">
     <input type="text" class="search-input" id="searchInput" placeholder="搜索公司 / 关键词…" oninput="onSearch()">
     <div class="view-toggle">
-      <button class="view-btn active" onclick="switchView('overview',this)">公司总览</button>
-      <button class="view-btn" onclick="switchView('detail',this)">公司详情</button>
-      <button class="view-btn" onclick="switchView('compare',this)">公司对比</button>
+      <button class="view-btn active" onclick="switchView('overview',this)">总览</button>
+      <button class="view-btn" onclick="switchView('detail',this)">详情</button>
+      <button class="view-btn" onclick="switchView('compare',this)">对比</button>
     </div>
   </div>
 </div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="main-wrap">
   <div class="sidebar">
@@ -2956,7 +3055,7 @@ function renderSidebar() {
     const active = state.selectedCompany && state.selectedCompany.id === c.id ? 'active' : '';
     const dotCls = 'dot-' + sectorShort(c.sector);
     const recCount = c.records.length;
-    return `<div class="sidebar-item ${active}" onclick="selectCompany('${c.id}')">
+    return `<div class="sidebar-item ${active}" onclick="selectCompany('${c.id}');closeSidebar()">
       <span class="si-dot ${dotCls}"></span>
       <div class="si-info">
         <div class="si-name">${c.name}</div>
@@ -3150,6 +3249,15 @@ function switchView(view, btn) {
   if (btn) btn.classList.add('active');
   else document.querySelectorAll('.view-btn').forEach(b => { if (b.textContent.includes(view === 'detail' ? '详情' : view === 'overview' ? '总览' : '对比')) b.classList.add('active'); });
   renderContent();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebarList').closest('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebarList').closest('.sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
 }
 
 function filterSector(sector, btn) {
