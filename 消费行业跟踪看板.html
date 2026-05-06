@@ -1,0 +1,3201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大消费行业跟踪看板</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-light: #f7fafd;
+    --card-bg: #ffffff;
+    --card-hover: #f0f7ff;
+    --border: #d0dce8;
+    --soft-border: #c5d8ea;
+    --accent: #003778;
+    --accent2: #2e7d9e;
+    --accent3: #C00000;
+    --accent4: #FF6464;
+    --text: #1a2332;
+    --text-muted: #5a6a7e;
+    --tag-bg: #eef4fa;
+    --up: #C00000;
+    --down: #2e7d9e;
+    --neutral: #5a6a7e;
+    --light-blue: #C9F0FF;
+    --deep-red: #C00000;
+    --coral: #FF6464;
+    --navy: #003778;
+    --pale-blue: #e8f4fd;
+    --sidebar-w: 280px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar {
+    background: #003778; border-bottom: 2px solid var(--deep-red);
+    padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 200; flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar h1 { font-size: 1.15rem; font-weight: 700; color: #fff; font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif; }
+  .topbar .badge { background: var(--deep-red); color: #fff; font-size: 0.68rem; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .search-input {
+    background: #ffffff; border: 1px solid #c5d8ea; color: var(--text);
+    padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; width: 200px; outline: none;
+    font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+  }
+  .search-input:focus { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(0,55,120,.15); }
+  .view-toggle { display: flex; gap: 4px; }
+  .view-btn {
+    padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2); color: #C9F0FF;
+    transition: all .2s; font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+  }
+  .view-btn:hover, .view-btn.active { background: #fff; color: var(--navy); border-color: #fff; }
+
+  .main-wrap { display: flex; flex: 1; overflow: hidden; }
+
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; background: var(--bg-light); overflow: hidden;
+  }
+  .sidebar-filter {
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 5px; flex-wrap: wrap;
+  }
+  .sf-btn {
+    padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 500;
+    background: #fff; border: 1px solid var(--soft-border); color: var(--text-muted);
+    cursor: pointer; transition: all .2s; font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+  }
+  .sf-btn:hover, .sf-btn.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .sidebar-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+  .sidebar-item {
+    padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent;
+    transition: all .15s; display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-item:hover { background: var(--pale-blue); }
+  .sidebar-item.active { background: var(--pale-blue); border-left-color: var(--navy); }
+  .si-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .si-dot.dot-黄金珠宝 { background: var(--deep-red); }
+  .si-dot.dot-家电 { background: var(--navy); }
+  .si-dot.dot-纺服 { background: #2e7d9e; }
+  .si-dot.dot-食品饮料 { background: #27ae60; }
+  .si-dot.dot-农业 { background: #e67e22; }
+  .si-dot.dot-美护 { background: #8e44ad; }
+  .si-dot.dot-轻工 { background: #c0392b; }
+  .si-dot.dot-酒店旅游 { background: #2980b9; }
+  .si-dot.dot-户外装备 { background: #f39c12; }
+  .si-dot.dot-餐饮 { background: #e74c3c; }
+  .si-info { flex: 1; min-width: 0; }
+  .si-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .si-sub { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .si-count { font-size: 0.62rem; color: #fff; background: var(--navy); border-radius: 99px; padding: 1px 6px; flex-shrink: 0; }
+
+  .content { flex: 1; overflow-y: auto; padding: 0; }
+
+  .detail-view { display: none; }
+  .detail-view.active { display: block; }
+
+  .detail-header {
+    padding: 24px 28px 18px; border-bottom: 1px solid var(--border); background: #fff;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .dh-row1 { display: flex; align-items: center; justify-content: space-between; }
+  .dh-name { font-size: 1.4rem; font-weight: 700; color: var(--navy); }
+  .dh-code { font-size: 0.78rem; color: var(--text-muted); font-weight: 400; margin-left: 8px; font-family: Arial, sans-serif; }
+  .dh-sector { font-size: 0.7rem; padding: 3px 10px; border-radius: 99px; font-weight: 600; white-space: nowrap; }
+  .sector-黄金珠宝 { background: rgba(192,0,0,.08); color: #C00000; }
+  .sector-家电 { background: rgba(0,55,120,.1); color: #003778; }
+  .sector-纺服 { background: rgba(46,125,158,.1); color: #2e7d9e; }
+  .sector-食品饮料 { background: rgba(39,174,96,.1); color: #27ae60; }
+  .sector-农业 { background: rgba(230,126,34,.1); color: #e67e22; }
+  .sector-美护 { background: rgba(142,68,173,.1); color: #8e44ad; }
+  .sector-轻工 { background: rgba(192,0,0,.1); color: #C00000; }
+  .sector-酒店旅游 { background: rgba(41,128,185,.1); color: #2980b9; }
+  .sector-户外装备 { background: rgba(243,156,18,.1); color: #f39c12; }
+  .sector-餐饮 { background: rgba(231,76,60,.1); color: #e74c3c; }
+  .dh-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+  .dh-metrics-wrap { display: flex; gap: 0; margin-top: 14px; border: 1px solid var(--soft-border); border-radius: 10px; overflow: hidden; }
+  .dh-group { flex: 1; display: flex; flex-direction: column; border-right: 2px solid var(--soft-border); }
+  .dh-group:last-child { border-right: none; flex: 0.6; }
+  .dh-group-title {
+    font-size: 0.65rem; font-weight: 700; color: var(--navy); text-align: center;
+    padding: 4px 6px; background: rgba(0,55,120,.07); border-bottom: 1px solid var(--soft-border);
+    letter-spacing: .03em;
+  }
+  .dh-group-cells { display: flex; flex: 1; }
+  .dh-metric {
+    flex: 1; padding: 9px 8px; text-align: center; border-right: 1px solid var(--soft-border); background: var(--pale-blue);
+  }
+  .dh-metric:last-child { border-right: none; }
+  .dh-metric .val { font-size: 0.9rem; font-weight: 700; font-family: Arial, KaiTi, sans-serif; }
+  .dh-metric .val.up { color: var(--up); }
+  .dh-metric .val.down { color: var(--down); }
+  .dh-metric .val.neutral { color: #aaa; }
+  .dh-metric .lbl { font-size: 0.62rem; color: var(--text-muted); margin-top: 2px; }
+
+  .timeline { padding: 24px 28px 40px; }
+  .timeline-title { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 16px; letter-spacing: .05em; }
+  .tl-item {
+    position: relative; padding-left: 28px; padding-bottom: 28px;
+    border-left: 2px solid var(--soft-border); margin-left: 8px;
+  }
+  .tl-item:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .tl-dot {
+    position: absolute; left: -7px; top: 2px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--navy); border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--navy);
+  }
+  .tl-dot.type-调研 { background: var(--deep-red); box-shadow: 0 0 0 2px var(--deep-red); }
+  .tl-dot.type-业绩会 { background: #2e7d9e; box-shadow: 0 0 0 2px #2e7d9e; }
+  .tl-dot.type-策略会 { background: #e67e22; box-shadow: 0 0 0 2px #e67e22; }
+  .tl-dot.type-其他 { background: var(--coral); box-shadow: 0 0 0 2px var(--coral); }
+  .tl-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .tl-date { font-size: 0.78rem; color: var(--text-muted); font-family: Arial, sans-serif; }
+  .tl-type { font-size: 0.62rem; padding: 1px 7px; border-radius: 99px; font-weight: 600; }
+  .type-tag-调研 { background: rgba(192,0,0,.1); color: var(--deep-red); }
+  .type-tag-业绩会 { background: rgba(46,125,158,.1); color: #2e7d9e; }
+  .type-tag-策略会 { background: rgba(230,126,34,.1); color: #e67e22; }
+  .type-tag-其他 { background: rgba(255,100,100,.1); color: var(--coral); }
+  .tl-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; box-shadow: 0 1px 4px rgba(0,55,120,.05);
+  }
+  .tl-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .tl-tag {
+    font-size: 0.68rem; padding: 2px 8px; border-radius: 99px;
+    background: var(--tag-bg); border: 1px solid var(--soft-border); color: var(--text-muted);
+  }
+  .tl-tag.hot { background: rgba(192,0,0,.08); border-color: rgba(192,0,0,.25); color: #C00000; }
+  .tl-tag.up { background: rgba(0,55,120,.08); border-color: rgba(0,55,120,.2); color: #003778; }
+  .tl-section { margin-bottom: 10px; }
+  .tl-section:last-child { margin-bottom: 0; }
+  .tl-section-title { font-size: 0.72rem; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+  .tl-section-content { font-size: 0.82rem; color: #3a4a5e; line-height: 1.7; }
+
+  .overview-view { display: none; padding: 20px 28px 40px; }
+  .overview-view.active { display: block; }
+  .overview-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(370px, 1fr)); gap: 14px; }
+  .ocard {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,55,120,.06);
+  }
+  .ocard::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--navy); border-radius: 12px 12px 0 0;
+  }
+  .ocard:hover { border-color: var(--navy); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,55,120,.1); }
+  .ocard[data-sector="黄金珠宝"]::before { background: var(--deep-red); }
+  .ocard[data-sector="家电"]::before { background: var(--navy); }
+  .ocard[data-sector="纺服"]::before { background: #2e7d9e; }
+  .ocard[data-sector="食品饮料"]::before { background: #27ae60; }
+  .ocard[data-sector="农业"]::before { background: #e67e22; }
+  .ocard[data-sector="美护"]::before { background: #8e44ad; }
+  .ocard[data-sector="轻工"]::before { background: #C00000; }
+  .ocard[data-sector="酒店旅游"]::before { background: #2980b9; }
+  .ocard[data-sector="户外装备"]::before { background: #f39c12; }
+  .ocard[data-sector="餐饮"]::before { background: #e74c3c; }
+  /* ── 行业总结卡片 ── */
+  .sector-summary {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #f8f9fc 0%, #f0f2f8 100%);
+    border: 1px solid #d8dde6;
+    border-radius: 10px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .ss-header {
+    background: linear-gradient(90deg, var(--navy) 0%, #1a428a 100%);
+    color: #fff;
+    padding: 10px 16px;
+  }
+  .ss-title {
+    font-size: .9rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+  .ss-body {
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .ss-section p {
+    font-size: .8rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+  .ss-label {
+    display: block;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--navy);
+  }
+  @media (max-width: 900px) {
+    .ss-body { grid-template-columns: 1fr; }
+  }
+  .ocard-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .ocard-name { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .ocard-code { font-size: 0.68rem; color: var(--text-muted); font-weight: 400; margin-left: 6px; font-family: Arial, sans-serif; }
+  .ocard-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+  .ocard-metrics { display: flex; gap: 0; margin-bottom: 10px; background: var(--pale-blue); border-radius: 8px; overflow: hidden; }
+  .ocard-metric { flex: 1; padding: 8px 10px; border-right: 1px solid var(--soft-border); text-align: center; }
+  .ocard-metric:last-child { border-right: none; }
+  .ocard-metric .val { font-size: 0.92rem; font-weight: 700; font-family: Arial, KaiTi, sans-serif; }
+  .ocard-metric .val.up { color: var(--up); }
+  .ocard-metric .val.down { color: var(--down); }
+  .ocard-metric .val.neutral { color: var(--neutral); }
+  .ocard-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .ocard-tag {
+    font-size: 0.66rem; padding: 1px 7px; border-radius: 99px;
+    background: var(--tag-bg); border: 1px solid var(--soft-border); color: var(--text-muted);
+  }
+  .ocard-tag.hot { background: rgba(192,0,0,.08); border-color: rgba(192,0,0,.25); color: #C00000; }
+  .ocard-tag.up { background: rgba(0,55,120,.08); border-color: rgba(0,55,120,.2); color: #003778; }
+  .ocard-latest { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+  .ocard-latest strong { color: var(--navy); }
+
+  .compare-view { display: none; padding: 20px 28px 40px; }
+  .compare-view.active { display: block; }
+  .compare-header { margin-bottom: 16px; }
+  .compare-header h2 { font-size: 1rem; color: var(--navy); margin-bottom: 8px; }
+  .compare-selects { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .compare-select {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid var(--soft-border);
+    font-size: 0.82rem; background: #fff; color: var(--text); min-width: 140px;
+    font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+  }
+  .compare-add-btn {
+    padding: 6px 14px; border-radius: 8px; border: 1px dashed var(--navy);
+    background: var(--pale-blue); color: var(--navy); cursor: pointer; font-size: 0.82rem;
+    font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+  }
+  .compare-table-wrap { overflow-x: auto; }
+  .compare-table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+  }
+  .compare-table th {
+    background: var(--navy); color: #fff; padding: 10px 14px; text-align: left;
+    font-weight: 600; white-space: nowrap; position: sticky; top: 0;
+  }
+  .compare-table td {
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+    vertical-align: top; line-height: 1.6; max-width: 280px;
+  }
+  .compare-table tr:hover td { background: var(--pale-blue); }
+  .compare-table .row-label { font-weight: 600; color: var(--navy); white-space: nowrap; background: var(--bg-light); }
+
+  footer {
+    text-align: center; padding: 14px; color: var(--text-muted); font-size: 0.72rem;
+    border-top: 1px solid var(--border); background: var(--bg-light); flex-shrink: 0;
+  }
+
+  @media (max-width: 800px) {
+    .sidebar { width: 200px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .main-wrap { flex-direction: column; }
+    .sidebar { width: 100%; max-height: 200px; border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  .sidebar-list::-webkit-scrollbar, .content::-webkit-scrollbar { width: 5px; }
+  .sidebar-list::-webkit-scrollbar-thumb, .content::-webkit-scrollbar-thumb { background: #c5d8ea; border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>📋 大消费行业跟踪看板</h1>
+    <span class="badge" id="total-badge"></span>
+  </div>
+  <div class="topbar-right">
+    <input type="text" class="search-input" id="searchInput" placeholder="搜索公司 / 关键词…" oninput="onSearch()">
+    <div class="view-toggle">
+      <button class="view-btn active" onclick="switchView('overview',this)">公司总览</button>
+      <button class="view-btn" onclick="switchView('detail',this)">公司详情</button>
+      <button class="view-btn" onclick="switchView('compare',this)">公司对比</button>
+    </div>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="sidebar">
+    <div class="sidebar-filter">
+      <button class="sf-btn active" onclick="filterSector('all',this)">全部</button>
+      <button class="sf-btn" onclick="filterSector('黄金珠宝',this)">黄金珠宝</button>
+      <button class="sf-btn" onclick="filterSector('家电',this)">家电</button>
+      <button class="sf-btn" onclick="filterSector('纺服',this)">纺服</button>
+      <button class="sf-btn" onclick="filterSector('食品饮料',this)">食品饮料</button>
+      <button class="sf-btn" onclick="filterSector('农业',this)">农业</button>
+      <button class="sf-btn" onclick="filterSector('美护',this)">美护</button>
+      <button class="sf-btn" onclick="filterSector('轻工',this)">轻工</button>
+      <button class="sf-btn" onclick="filterSector('酒店旅游',this)">酒店旅游</button>
+      <button class="sf-btn" onclick="filterSector('户外装备',this)">户外装备</button>
+      <button class="sf-btn" onclick="filterSector('餐饮',this)">餐饮</button>
+    </div>
+    <div class="sidebar-list" id="sidebarList"></div>
+  </div>
+
+  <div class="content" id="contentArea"></div>
+</div>
+
+<footer>数据来源于各公司公开调研纪要及业绩说明会，仅供研究参考，不构成投资建议。</footer>
+
+<script>
+const companies = [
+  // ───── 黄金珠宝 ─────
+  {
+    id: "laopu", name: "老铺黄金", code: "02147.HK", sector: "黄金珠宝", sub: "中国古法黄金第一品牌（奢侈品定位）",
+    records: [{
+      date: "2025-04", type: "业绩会", title: "2024年年报业绩会",
+      metrics: [
+        { label: "2024收入", val: "~100亿", trend: "up" },
+        { label: "2024收入YoY", val: "+166%", trend: "up" },
+        { label: "2024净利润", val: "14.7亿", trend: "up" },
+        { label: "2024净利YoY", val: "+253%", trend: "up" },
+        { label: "店效", val: "2亿+", trend: "up" },
+        { label: "同店增长", val: "+121%", trend: "up" },
+        { label: "毛利率", val: "~40%", trend: "up" },
+        { label: "门店数", val: "36家", trend: "up" },
+        { label: "线上收入", val: "10.55亿/12.4%", trend: "up" }
+      ],
+      tags: ["收入翻倍","净利+253%","古法金奢侈品","店效2亿"],
+      focus: "①奢侈品定位可持续性（对标茅台/国际珠宝奢侈品）；②单店收入空间（目标>10亿/店，当前2亿）；③海外拓展（新加坡/日本/东南亚/欧美）；④产品迭代与老客复购；⑤40%毛利率+品牌溢价空间",
+      highlights: "2024年销售近100亿（+166%），毛利35亿（+163%），净利14.7亿（+253%）。同店+121%，平均店效超2亿。会员35万人（+15万）。开设7家新门店（总36家，15城）。线上收入10.55亿（占12.4%）。2019年首创足金镶钻，2022年首创足金烧蓝。近2000项原创设计，境内外专利477项+作品著作权1314项。存货40.8亿（周转195天），经营现金净流入12亿，拟派息10亿。",
+      guidance: "①2025年计划完成国内头部商场拓展（目标店效>10亿）；②进入新加坡/日本市场，先获取华人市场后拓展非华人；③与万象城商谈转自有收银加速回款；④不会降价，坚持奢侈品调性；⑤品牌溢价还有空间（当前主要在设计溢价，真正品牌溢价不高）；⑥春夏秋推新，频率不能太高，强调原创和稀缺性",
+      extra: "古法金市场2023年约1500亿，一线+省会600-700亿，高端占1/3约200-300亿。目标客群=所有奢侈品客群。员工工资高，销售挂钩占比小，大量招空乘。商场租金扣点显著低于国内其他品牌。足金+保底设计，扣点明显低于国内外品牌。北京SKP Chanel高峰年收40亿，老铺单店收入有空间到10亿+。出海东南亚+欧美。所有工艺流程交给一家工厂，保证品质统一。"
+    }]
+  },
+  {
+    id: "zhoudafu", name: "周大福", code: "01929.HK", sector: "黄金珠宝", sub: "中国最大珠宝连锁品牌",
+    records: [{
+      date: "2026-03", type: "策略会", title: "2026春季策略会·黄金珠宝行业交流",
+      metrics: [
+        { label: "2026产品结构", val: "克重60%", trend: "down" },
+        { label: "一口价占比", val: "40%", trend: "up" },
+        { label: "关店数(25)", val: "1600-1700", trend: "down" },
+        { label: "毛利率", val: "同比持平", trend: "neutral" },
+        { label: "克重→一口价", val: "结构性提升", trend: "up" },
+        { label: "金价影响", val: "观望浓厚", trend: "down" },
+        { label: "高低线分化", val: "三四线双降", trend: "down" },
+        { label: "26年闭店", val: "小高峰", trend: "down" },
+        { label: "行业趋势", val: "回收增多", trend: "down" }
+      ],
+      tags: ["克重降60%","一口价+40%","关店高峰","金价观望"],
+      focus: "①克重黄金占比从75%降至60%后的毛利率变化；②金价翻倍（挂牌价较去年近乎翻倍）对消费的影响；③三四线婚嫁消费人数/客单价双降；④2026年闭店小高峰（3-4月加速）；⑤品牌降低克重库存，提升一口价库存占比",
+      highlights: "2026年行业产品结构重大变化：克重黄金从75%降至60%，一口价产品提升至40%（黄金一口价30-35%）。黄金消费客群向一二线集中（头部品牌55%）。行业毛利总额同比2025年或不下滑，叠加金价带动一口价调价，利润或小幅提升。2025年为近三年关店高峰，周大福关店1600-1700家，主因疫情后盲目扩店（2022年新开店合同3年期到期）。2026年3-4月闭店加速（盈亏平衡门店放弃）。",
+      guidance: "①刚需观望程度超以往，历史消费复苏经验失效；②若金价保持上涨，消费复苏时间进一步延长；③三四线年轻群体向一二线逆向消费；④门店惜售、品牌降低克重库存；⑤预计下半年消费复苏但取决于金价走势",
+      extra: "全市场黄金回收变现增多，金价上涨预期降温。头部品牌黄金一二线客户占比约55%。克重↓+一口价↑后，毛利总额结构优化。老庙/老凤祥等头部品牌均大幅关店。"
+    }]
+  },
+  {
+    id: "liufuhung", name: "六福珠宝", code: "00590.HK", sector: "黄金珠宝", sub: "香港珠宝品牌（镶嵌+黄金双主线）",
+    records: [{
+      date: "2026-03", type: "策略会", title: "2026春季策略会·黄金珠宝行业交流",
+      metrics: [
+        { label: "行业环境", val: "金价承压", trend: "down" },
+        { label: "产品结构", val: "克重↓", trend: "down" },
+        { label: "一二线", val: "集中化", trend: "up" },
+        { label: "毛利率", val: "结构优化", trend: "up" },
+        { label: "黄金回收", val: "增多", trend: "up" },
+        { label: "婚嫁", val: "三四线双降", trend: "down" },
+        { label: "观望情绪", val: "浓厚", trend: "down" },
+        { label: "闭店", val: "加速", trend: "down" },
+        { label: "行业地位", val: "一线品牌", trend: "neutral" }
+      ],
+      tags: ["黄金回收","观望浓厚","结构性调整","一线品牌"],
+      focus: "①金价高企对镶嵌类产品的间接影响；②内地同店表现；③香港/澳门旅游消费恢复",
+      highlights: "行业整体克重黄金占比下降，一口价产品提升。金价上涨预期降温，刚需消费观望。",
+      guidance: "关注金价走势对消费复苏节奏的影响。",
+      extra: "与周大福/老凤祥同为一线品牌，在行业调整期承压但品牌韧性仍在。"
+    }]
+  },
+  {
+    id: "laofengxiang", name: "老凤祥", code: "600612.SH", sector: "黄金珠宝", sub: "百年老字号（批发平台模式）",
+    records: [{
+      date: "2025-11", type: "调研", title: "上海总部调研",
+      metrics: [
+        { label: "会员地位", val: "3自营+1代理", trend: "up" },
+        { label: "金价传导", val: "上调6-7%", trend: "up" },
+        { label: "批发价上调", val: "已传导", trend: "up" },
+        { label: "双十一", val: "加大促销", trend: "neutral" },
+        { label: "行业壁垒", val: "席位不可新增", trend: "up" },
+        { label: "竞争格局", val: "头部集中", trend: "up" },
+        { label: "定价权", val: "金交所基准", trend: "neutral" },
+        { label: "渠道力", val: "经销商网络", trend: "up" },
+        { label: "品牌力", val: "百年品牌", trend: "up" }
+      ],
+      tags: ["金交所会员","批发平台","品牌壁垒","传导调价"],
+      focus: "①金交所会员席位壁垒（3自营+1代理，不可新增）；②金价波动下的批发价传导机制（上调6-7%至经销商）；③经销商端双十一促销平抑涨价；④老铺非会员无货料来源的风险",
+      highlights: "公司拥有3个自营会员席位+1个代理会员席位，可通过金交所场内同步交易。金交所对会员及代理开户实行严格管控，新增席位可能性极低。已对经销商批发价实施上调（涨幅6-7%），经销商参考零售价小幅调整。借双十一契机加大促销力度，实际优惠高于往年，平抑政策涨价影响。",
+      guidance: "①黄金批发平台模式受金交所政策保护，壁垒极高；②金价传导及时但终端需消化；③行业龙头在金价波动中受益集中化",
+      extra: "老铺不是金交所会员单位，没有货料来源，不提价就没有获利空间。常规提价时间正好碰到新政。金价恢复很快（940-950元/克），后续走势不确定。"
+    }]
+  },
+  {
+    id: "zhouloufu", name: "周大生", code: "002862.SZ", sector: "黄金珠宝", sub: "镶嵌龙头转型黄金",
+    records: [{
+      date: "2026-03", type: "策略会", title: "2026春季策略会·行业交流",
+      metrics: [
+        { label: "产品结构", val: "转型中", trend: "neutral" },
+        { label: "行业地位", val: "一线阵营", trend: "neutral" },
+        { label: "金价影响", val: "承压", trend: "down" },
+        { label: "渠道", val: "加盟为主", trend: "neutral" },
+        { label: "三四线下沉", val: "承压更大", trend: "down" },
+        { label: "品牌", val: "镶嵌起家", trend: "neutral" },
+        { label: "转型", val: "黄金占比提升", trend: "up" },
+        { label: "毛利率", val: "承压", trend: "down" },
+        { label: "调整", val: "行业洗牌", trend: "neutral" }
+      ],
+      tags: ["镶嵌转型","行业洗牌","金价承压","下沉市场"],
+      focus: "①镶嵌转黄金的产品结构调整；②三四线下沉市场压力",
+      highlights: "行业结构调整期，镶嵌品牌向黄金转型。",
+      guidance: "关注产品结构调整和三四线恢复节奏。",
+      extra: "行业闭店潮中承压，品牌集中度将提升。"
+    }]
+  },
+  {
+    id: "mankalong", name: "曼卡龙", code: "300995.SZ", sector: "黄金珠宝", sub: "线上基因珠宝品牌",
+    records: [{
+      date: "2025-06", type: "调研", title: "杭州总部调研",
+      metrics: [
+        { label: "线上占比", val: ">50%", trend: "up" },
+        { label: "2019线上", val: "<5%", trend: "up" },
+        { label: "渠道策略", val: "线上到线下", trend: "up" },
+        { label: "电商平台", val: "天猫破圈", trend: "up" },
+        { label: "线下", val: "蓝海市场", trend: "up" },
+        { label: "品牌", val: "渠道品牌", trend: "neutral" },
+        { label: "全国化", val: "发展中", trend: "up" },
+        { label: "产品力", val: "社交传播", trend: "up" },
+        { label: "差异化", val: "最难路径", trend: "up" }
+      ],
+      tags: ["线上50%+","天猫破圈","线上线下闭环","差异化"],
+      focus: "①线上占比从5%到50%+的渠道策略有效性；②天猫破圈→线下蓝海的闭环模式；③全国化发展空间；④社交传播对品牌认知的反向推动",
+      highlights: "2019年线上占比不到5%，如今已超50%。选择最难路径——做天猫（流量贵但聚焦核心城市）。线上产品力和社交传播增强线下认知，反向推动线下渠道拓展。从线上到线下的闭环模式验证成功。",
+      guidance: "①线下渠道作为蓝海市场布局；②内容+产品+品牌+渠道持续增量；③不走照搬路径，靠差异化竞争",
+      extra: "杭州地域优势（阿里附近）让公司找到赛道机会。通过天猫破圈延伸到其他渠道，社交传播增强认知。"
+    }]
+  },
+  {
+    id: "zhouliufu", name: "周六福", code: "未上市", sector: "黄金珠宝", sub: "品牌升级（成就世界级时尚集团）",
+    records: [{
+      date: "2026-01", type: "调研", title: "哈尔滨调研",
+      metrics: [
+        { label: "覆盖", val: "31省319市", trend: "up" },
+        { label: "品牌主张", val: "四代迭代", trend: "up" },
+        { label: "非遗文化", val: "4种工艺", trend: "up" },
+        { label: "品牌色", val: "琥珀橙", trend: "up" },
+        { label: "海外", val: "拓展中", trend: "up" },
+        { label: "IP联动", val: "257亿播放", trend: "up" },
+        { label: "门店", val: "全国网络", trend: "up" },
+        { label: "四心服务", val: "强化中", trend: "up" },
+        { label: "品牌力", val: "持续升级", trend: "up" }
+      ],
+      tags: ["品牌升级","非遗文化","四代主张","琥珀橙"],
+      focus: "①第四代品牌主张'见证你的黄金时刻'；②非遗文化珠宝（宋锦/竹编/汝瓷/潮州木雕）；③第三代品牌色'琥珀橙'；④与《非遗里的中国》257亿次播放",
+      highlights: "2026年推出第四代品牌主张，完成从情感承载者到生命价值见证者的角色演化。发布第三代品牌色'琥珀橙'，视觉系统全面更新。推出非遗文化珠宝系列，融合4种工艺，花丝+錾刻+珐琅多技法重构，蝴蝶纹机关动态悬浮结构。与《非遗里的中国》合作播放量达257.3亿次。覆盖31省319市及东南亚市场。",
+      guidance: "①全球化布局（天猫/京东领先，拓展海外）；②强化'四心服务'体系；③线下门店同步改造",
+      extra: "超模陆仙人演绎非遗新品大秀。北京开设全球首家非遗文化主题店。"
+    }]
+  },
+
+  // ───── 家电 ─────
+  {
+    id: "midea", name: "美的集团", code: "000333.SZ", sector: "家电", sub: "全球化家电巨头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "4160亿+", trend: "up" },
+        { label: "2025归母", val: "400亿+", trend: "up" },
+        { label: "研发投入", val: "178亿(+9.6%)", trend: "up" },
+        { label: "ToB占比", val: "26.8%", trend: "up" },
+        { label: "库卡收入", val: "310.1亿(+8.05%)", trend: "up" },
+        { label: "楼宇科技", val: "357.9亿(+25.72%)", trend: "up" },
+        { label: "东芝日本", val: "6品类16%+", trend: "up" },
+        { label: "AI投入", val: "3年600亿", trend: "up" },
+        { label: "海外基地", val: "65个中43个海外", trend: "up" },
+        { label: "AI人才", val: "400+人团队", trend: "up" },
+        { label: "人形机器人", val: "三代5款", trend: "up" },
+        { label: "累计派现", val: "1660亿+", trend: "up" },
+        { label: "累计回购", val: "388亿+", trend: "up" },
+        { label: "国内电商", val: "内销55%+", trend: "up" },
+        { label: "员工", val: "2.3万+研发", trend: "up" },
+        { label: "COLMO+东芝", val: "双位数增长", trend: "up" }
+      ],
+      tags: ["科技领先","OBM优先","AI战略","人形机器人","全球化"],
+      focus: "①2025年研发投入178亿(+9.6%),2.3万+研发人员,未来3年投入600亿(AI/具身智能/新能源/医疗);②AI400+人团队,AIGC搭建1.35万智能体提效1500万小时/7亿元;③ToB占比26.8%,楼宇科技357.9亿+25.72%,库卡310.1亿+8.05%;④东芝日本6品类16%+市占,OBM战略推进;⑤人形机器人三代5款,'美罗'进工厂,'美拉'2026年亮相门店",
+      highlights: "2025年国内电商销售额占内销55%+,下沉市场突破300亿。东芝日本冰箱/微波炉第一。库卡中国占收入30%,工业机器人国内出货3.2万台+30%市占9.6%。AIGC提效1500万小时降本7亿元。液冷智造基地佛山启动,CDU制冷密度提升50%。累计派现1660亿+回购388亿,2025分红+回购超归母净利润。",
+      guidance: "四大战略主轴:科技领先为核心,围绕核心增长,全球突破,全面成本领先。AI围绕智慧家居/智能制造/智慧办公/行业赋能,打造'家庭大脑'和'工厂大脑'。人形机器人按'工业-商业-家庭'推进。OBM优先,日本No.1战略。",
+      extra: "美罗U六臂超人形机器人无锡洗衣机工厂试点,换线效率+30%/空间-40%。美拉X2小时视频学习动作。瑞仕格四向车/医疗UniSmart发药系统。2026年新回购方案推出。"
+    },{
+      date: "2026-01", type: "调研", title: "佛山总部联合调研",
+      metrics: [
+        { label: "Q4收入", val: "中单位数", trend: "neutral" },
+        { label: "Q4利润", val: "双位数下滑", trend: "down" },
+        { label: "外销", val: "双位数增长", trend: "up" },
+        { label: "内销", val: "高单位数", trend: "neutral" },
+        { label: "并购亏损", val: "数亿预提", trend: "down" },
+        { label: "主业", val: "底个位增长", trend: "neutral" },
+        { label: "分红率", val: "补偿性上调", trend: "up" },
+        { label: "国补", val: "效果不及预期", trend: "down" },
+        { label: "Q1需求", val: "未见爆发", trend: "down" }
+      ],
+      tags: ["并购亏损","外销双位数","国补不及预期","一次性预提"],
+      focus: "①并购项目大几个亿亏损（预提费用/存货计提/海外工厂改装减值）；②库卡裁员计划预提几亿费用；③国补政策在不同地区分化（券有限/续接问题）；④外销双位数增长 vs 内销高单位数；⑤Q1需求未见明显爆发，消费者观望",
+      highlights: "Q4收入中位数增长，利润双位数下滑。若排除并购项目影响，原有业务底个位增长，利润持平。并购亏损来自预提费用、存货计提、海外工厂改装减值（Q3也有数亿）。原有主业利润率稳定。25年目标已超预期完成（预提放到Q4），分红率做补偿性上调。海外收入增长较快。",
+      guidance: "①国补需求还没有恢复，部分地区券额有限/续接问题；②1月需求未见爆发，存在消费者观望情绪；③空调调价函执行情况待观察；④并购当年不考核，第二年有考核压力",
+      extra: "铜价等原材料成本压力需关注。公司通过调价应对，每桶1/3调价对冲原材料成本下降的趋势。铜价中期仍可能上涨，目前压力可控。"
+    }]
+  },
+
+  // ───── 纺服 ─────
+  {
+    id: "tebu", name: "特步国际", code: "01368.HK", sector: "纺服", sub: "国产跑步鞋服龙头（主品牌+索康尼）",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026年Q1+4月经营近况交流",
+      metrics: [
+        { label: "Q1主品牌", val: "低单位数增长", trend: "up" },
+        { label: "Q1索康尼", val: "20%+", trend: "up" },
+        { label: "4月", val: "稳定增长", trend: "up" },
+        { label: "线上", val: "优于线下", trend: "up" },
+        { label: "儿童", val: "优于成人", trend: "up" },
+        { label: "折扣", val: "7-75折", trend: "neutral" },
+        { label: "库存", val: "4.5个月", trend: "up" },
+        { label: "DTC", val: "额外+500家", trend: "up" },
+        { label: "街边店→商场", val: "转型中", trend: "up" }
+      ],
+      tags: ["主品牌低单位数","索康尼+20%","库存4.5月","DTC+500家"],
+      focus: "①Q1主品牌低单位数增长+索康尼20%+增长，符合预期；②线上优于线下，儿童优于成人；③折扣稳定在7-7.5折，库存4.5个月健康水平；④2026年额外加500家DTC店铺（去年100家+今年500家=600家，占6300+店10%）；⑤渠道改革：小店开大店（300-500平地线大店，目标店效50万+），街边店→购物中心/商场；⑥奥莱升级+战略商场合作；⑦4月稳定增长但非大节月份，需等五一或更晚看Q2",
+      highlights: "Q1主品牌低单位数增长，索康尼20%+增长，符合预期。4月主品牌有增长，线上优于线下，儿童优于成人，折扣7-7.5折稳定，库存4.5个月健康。DTC调整：产品SKU结构优化+低效店铺关闭+合并开大店（300-500平地线大店，目标店效50万+）。街边店逐步转移至购物中心/商场，战略合作后经销商也可享受优惠。奥莱升级进行中。",
+      guidance: "①2026年额外加500家DTC（合计600家，占10%），打样板给经销商复制；②从批发收入→零售收入转变；③省份间运营效率对比提升；④等五一或更晚看Q2整体情况；⑤索康尼增长符合预期",
+      extra: "回收的DTC店铺中，部分合约租期到期关闭，再找高效地方开大店。经销商强的仍在街边店，但整体流水/形象提升需转移至商场。战略合作后经销商可在各自省份大型商场进场。"
+    }]
+  },
+  {
+    id: "bailong", name: "百隆东方", code: "601337.SH", sector: "纺服", sub: "全球色纺纱龙头",
+    records: [{
+      date: "2025-10", type: "调研", title: "2025年10月联合调研",
+      metrics: [
+        { label: "7月接单", val: "超去年同期", trend: "up" },
+        { label: "越南关税", val: "20%", trend: "up" },
+        { label: "4月关税", val: "46%→订单转印", trend: "down" },
+        { label: "Q2毛利率", val: "~15%", trend: "neutral" },
+        { label: "6月色纺占比", val: "~4成", trend: "neutral" },
+        { label: "坯纱毛利", val: "近10%", trend: "neutral" },
+        { label: "Q3坯纱", val: "价格调整", trend: "up" },
+        { label: "交期", val: "~60天", trend: "neutral" },
+        { label: "下半年", val: "较好开局", trend: "up" }
+      ],
+      tags: ["接单超去年","越南20%关税","毛利率15%","色纺调整"],
+      focus: "①截至7月接单量高于去年同期（传统旺季3-5月接单+60天交期→7-8月出货）；②越南20%关税低于孟加拉等东南亚地区，4月46%关税后部分美国超市品牌订单因税差转至印度；③二季度毛利率维持接近15%，6月底坯纱价格调整刺激量增（越南坯纱4-5月毛利近10%）；④6月色纺出货占比约四成，7月产品结构变化明显；⑤整体接单势头优于去年",
+      highlights: "7月接单超去年同期，但出货受5-6月接单影响存在时间滞后。越南20%关税落地符合预期，通过积极谈判获得有利税率。二季度毛利率与一季度持平接近15%。6月底坯纱价格调整刺激量增，7月色纺出货占比从四成明显提升。交期约60天，三四五月为接单生产旺季。",
+      guidance: "①新关税政策需更长时间窗口观察；②三季度及下半年毛利率需结合色纺需求恢复综合判定；③预计下半年越南纺织服装供应量迎来较好开局；④7月初更新新税率后续影响需持续观察",
+      extra: "越南20%关税低于孟加拉等东南亚其他地区对美关税税率。坯纱价格调整提供了毛利空间（越南工厂坯纱4-5月毛利近10%）。"
+    }]
+  },
+  {
+    id: "luolai", name: "罗莱生活", code: "002293.SZ", sector: "纺服", sub: "家用纺织品龙头",
+    records: [{
+      date: "2025-11", type: "调研", title: "2025年11月联合调研",
+      metrics: [
+        { label: "产业园投资", val: "5亿", trend: "up" },
+        { label: "B地块面积", val: "400+亩", trend: "up" },
+        { label: "B地块产值", val: "20-30亿", trend: "up" },
+        { label: "套件产能", val: "750万套自供", trend: "up" },
+        { label: "总规划产值", val: "120亿", trend: "up" },
+        { label: "自动化线", val: "6条全自动", trend: "up" },
+        { label: "深睡枕日销", val: "1500+", trend: "up" },
+        { label: "门店", val: "2700+", trend: "up" },
+        { label: "罗莱113", val: "太空棉品种", trend: "up" }
+      ],
+      tags: ["智慧产业园","全自动产线","深睡枕爆款","太空棉育种"],
+      focus: "①南通智慧产业园一期2025年4月建成（C+B地块），B地块5月投产3月搬6月生产，年400万套产值20-30亿，750万套套件100%自供约50亿，总规划120亿；②6条全自动套件生产线，从劳动密集型向AI/智能化转型；③罗莱113育种（神舟十二号太空辐射→海南育种中心→新疆金河2700h日照），超柔产品从育种开始投入；④深睡枕头日销1500+（高峰2000+），零压+人体工学+深睡+25min；⑤羽绒被95%绒朵标准（行标93%），单日销售纪录2000万",
+      highlights: "供应链端：南通智慧产业园一期建成，B地块500亩+，年产能400万套。自动化：6条全自动产线，少流转逐步AI化。产品研发：与中国棉花研究所合作'罗莱113'太空棉品种，text soft工艺+意大利唯一后整理设备。爆款：深睡枕头（零压0.01+工学设计+深睡+25min+日销1500+），羽绒被（95%标准+西伯利亚鹅绒+3下升温+单日2000万）。渠道：线上全平台+线下2700+门店。原材料遵循五大逻辑：高寒出好绒/日照出好棉/山清水秀出好丝/树木丰盛出好胶/水草丰美出好毛。",
+      guidance: "①老厂全部投完翻两倍；②算上被芯总规划120亿；③智能化筛选线持续优化",
+      extra: "罗莱113种子通过神舟十二号送入太空90多天宇宙射线照射，海南育种中心一年两次育种加速。新疆金河县年日照2700小时天山雪水灌溉。意大利专属中国家纺行业唯一后整理设备通过空气拍打使织物更柔软。"
+    }]
+  },
+  {
+    id: "shuixing", name: "水星家纺", code: "603365.SH", sector: "纺服", sub: "家纺品牌（线上+线下）",
+    records: [{
+      date: "2025-11", type: "调研", title: "2025年11月联合调研",
+      metrics: [
+        { label: "退货率", val: "~10%", trend: "neutral" },
+        { label: "大单品", val: "雪糕被+工学枕", trend: "up" },
+        { label: "大单品目标", val: "1亿+", trend: "up" },
+        { label: "枕芯同比", val: "+40%", trend: "up" },
+        { label: "雪糕被品类", val: "+60%", trend: "up" },
+        { label: "代言人", val: "H1两个", trend: "up" },
+        { label: "10月", val: "不错增长", trend: "up" },
+        { label: "线上渠道", val: "投放均衡", trend: "up" },
+        { label: "线上", val: "全渠道", trend: "up" }
+      ],
+      tags: ["大单品1亿+","退货率10%","内容营销","同款同价"],
+      focus: "①Q3投放策略：投流（各平台投流）+品宣（H1请两个代言人，上海五周年活动，小红书+抖音内容营销）；②费用投放全年均衡，电商增速逐季提速；③退货率10%左右无上升趋势，24年也是双位数；④大单品（雪糕杯凉感+人体工学枕延长睡眠30min）占比不到1亿+但外溢效应：枕芯+40%、雪糕被品类+60%、拉动线下Q3销售改善；⑤投流税对销售端无影响；⑥10月维持不错增长；⑦春夏订货会调整结构：增现货比例降期货+2次大订货几次小订货",
+      highlights: "投放策略：投流+品宣双管齐下，H1两个代言人+上海五周年+小红书抖音双渠道内容营销。退货率10%左右无上升。大单品策略有效：雪糕被+工学枕，外溢效应枕芯同比+40%、雪糕被品类+60%，线上线下同款同价拉动线下Q3改善。10月维持增长势头。订货会调整：增现货降期货，减少单次大订货依赖。品牌定位：床品/睡眠市场强关联，性价比优势（功能一样价格便宜）。",
+      guidance: "①明年进入复制过程（38年研发历史+复制形态领导者）；②大单品未进入订货体系；③关注投放效果逐步体现",
+      extra: "38年研发历史，经历过复制形态会成为领导者。"
+    }]
+  },
+  {
+    id: "techtape", name: "新澳股份", code: "603889.SH", sector: "纺服", sub: "羊毛精纺纱龙头",
+    records: [{
+      date: "2025-10", type: "调研", title: "2025年10月联合调研",
+      metrics: [
+        { label: "全球羊毛纱", val: "市占1.6%/中国8.1%", trend: "up" },
+        { label: "全球羊绒纱", val: "市占8.5%/中国11.7%", trend: "up" },
+        { label: "客户", val: "500+品牌/5000+客户", trend: "up" },
+        { label: "羊绒专利", val: "20+项", trend: "up" },
+        { label: "越南产能", val: "5万锭", trend: "up" },
+        { label: "宁夏产能", val: "2万锭", trend: "up" },
+        { label: "产能增速", val: "CAGR11.4%", trend: "up" },
+        { label: "外销增速", val: "+2.24%", trend: "up" },
+        { label: "内销增速", val: "-1.32%", trend: "down" }
+      ],
+      tags: ["市占前列","5万锭越南","功能性纱线","外销增速>内销"],
+      focus: "①把羊毛和羊绒变成高端纱线，覆盖毛条制条→纺纱→染整一体化；②全球羊毛纱市占1.6%（中国8.1%），羊绒纱市占8.5%（中国11.7%）；③越南5万锭（一期试生产）+宁夏2万锭（2025年投产），产能年复合增长11.4%；④品类拓展：突破针织→运动户外/家纺/梭织面料延伸；⑤越南产能享关税优势，契合东南亚产业链转移，外销+2.24%已高于内销-1.32%",
+      highlights: "全球毛纺行业领先的一体化企业，服务500+品牌/5000+客户，包括国际高端服饰品牌，合作稳定性高。拥有20+项山羊绒加工专利，牵头制定行业标准。研发投入持续倾斜功能性产品（抑菌/吸湿排汗纱线）。越南5万锭一期已试生产，宁夏2万锭2025年投产。",
+      guidance: "①品类突破传统针织向运动户外/家纺/梭织延伸；②越南产能享受关税优势；③外销收入增速已高于内销",
+      extra: "越南5万锭项目一期已试生产，宁夏2万锭2025年投产。越南产能享受关税优势，契合东南亚纺织产业链转移趋势。"
+    }]
+  },
+  {
+    id: "chaoying", name: "超盈国际控股", code: "02290.HK", sector: "纺服", sub: "运动服装+弹性面料ODM",
+    records: [{
+      date: "2025-11", type: "调研", title: "2025年11月联合调研",
+      metrics: [
+        { label: "营收增速", val: "年化10%", trend: "up" },
+        { label: "运动服占比", val: "60%", trend: "up" },
+        { label: "毛利率", val: "~25%", trend: "up" },
+        { label: "营业利润率", val: "~10%", trend: "up" },
+        { label: "ROE", val: "10%+", trend: "up" },
+        { label: "股利支付率", val: "45%", trend: "up" },
+        { label: "股息率", val: "~6%", trend: "up" },
+        { label: "越南投资", val: "5.9亿美元", trend: "up" },
+        { label: "运动服饰CAGR", val: "31.6%(14-23)", trend: "up" }
+      ],
+      tags: ["运动服60%","年化10%增长","越南5.9亿美元","ROE10%+"],
+      focus: "①2003年成立→2014年上市，卢煜光大股东60%；②主营女性内衣/弹性丝带→拓展运动服装（营收占60%）；③近十年营收年化增速10%（运动服装增长驱动），毛利率25%，营业利润率10%，ROE10%+；④产能东莞/越南/斯里兰卡各50%，降低制造成本+缓解关税风险；⑤2024年宣布越南5.9亿美元新基地，预计2026年投产；⑥近五年股利支付率45%，2024年静态股息率~6%",
+      highlights: "2024年营收约23.3亿港元，净利润2.6亿港元，毛利率19-27%，股息率8-10%。运动服饰品类2014-2023年年均复合增长率达31.6%。客户涵盖爱慕/安德玛/优衣库/维多利亚的秘密等国际品牌。全球产能布局降低关税风险。",
+      guidance: "①越南新基地2026年投产；②运动服装继续为主要增长驱动力；③全球化产能持续分散风险",
+      extra: "作为全球针织面料细分领域龙头，运动服饰品类14-23年CAGR达31.6%。固定资产占总资产42%较高水平，每年资本性支出约4亿。"
+    }]
+  },
+  {
+    id: "yabin", name: "比音勒芬", code: "002832.SZ", sector: "纺服", sub: "高端运动休闲服饰（生活高尔夫）",
+    records: [{
+      date: "2025-11", type: "调研", title: "2025年11月联合调研",
+      metrics: [
+        { label: "品牌进化", val: "商务→生活高尔夫", trend: "up" },
+        { label: "门店矩阵", val: "1000+200+户外", trend: "up" },
+        { label: "毛利率", val: "~75%", trend: "up" },
+        { label: "正价净利", val: "超额利润", trend: "up" },
+        { label: "奥莱净利", val: "4-5折≈正价", trend: "up" },
+        { label: "线上线下", val: "同款同价", trend: "up" },
+        { label: "电商", val: "增长很快", trend: "up" },
+        { label: "电商价格带", val: "~2000元", trend: "up" },
+        { label: "库存策略", val: "牺牲周转", trend: "up" }
+      ],
+      tags: ["生活高尔夫","正价超额利润","全渠道同款","存货周转慢"],
+      focus: "①1.0商务男装倒逼产品力→日韩调研→生活高尔夫起家→时尚黑标；2.0洞察高端运动品牌稀缺→延伸高尔夫绿标（1000家商场集合店，前100-200家独立高尔夫）；3.0户外系列（软壳冲锋衣）开第一家店；②核心优势：自主研发能力+品牌DNA延续+国际面料供应商+体量同类轻奢中性价比高；③逆势扩张：拿到更好渠道/设计师/供应链/优质代理商；④电商增长很快，全直营（奥莱纯直营+电商纯直营），线上线下同款同价，电商可承接2000元价格带；⑤存货策略：放8-9个月再卖，牺牲周转率保客户体验；⑥女装上货波段比男装早3星期，男装早2星期",
+      highlights: "发展三阶段：商务男装→生活高尔夫→高端绿标→户外系列。竞争优势：自主研发+品牌DNA+同体量轻奢性价比最高。正价店净利率超额利润，奥莱4-5折净利≈普通品牌，存货基本可变现。电商全直营+代运营结合，老平台代运营自建团队。",
+      guidance: "①逆势扩张筛选：多年高端经验+店铺资源+团队+VIP资源；②电商持续投入；③库存策略牺牲周转保体验",
+      extra: "很多同行只赚一轮钱，比音赚两轮（正价+奥莱），奥莱净利率≈正价店普通品牌。"
+    }]
+  },
+
+  // ───── 食品饮料 ─────
+  {
+    id: "haitian", name: "海天味业", code: "603288.SH", sector: "食品饮料", sub: "中国调味品龙头（酱油 + 蚝油 + 调味酱）",
+    records: [{
+      date: "2025", type: "业绩会", title: "2025 年度业绩说明会",
+      metrics: [
+        { label: "酱油产能", val: "286 万吨", trend: "neutral" },
+        { label: "蚝油产能", val: "120 万吨", trend: "neutral" },
+        { label: "调味酱产能", val: "40 万吨", trend: "neutral" },
+        { label: "出口国家", val: "超 80 个", trend: "up" },
+        { label: "分红率", val: "112.95%", trend: "up" },
+        { label: "海外基地", val: "已落地", trend: "up" },
+        { label: "BRCGS 评级", val: "B→A 级", trend: "up" },
+        { label: "股东回报", val: "2025-2027 规划", trend: "up" },
+        { label: "员工持股", val: "持续开展", trend: "up" }
+      ],
+      tags: ["分红 112.95%","出口 80+ 国","B 级→A 级","海外基地落地"],
+      focus: "①产能布局：酱油/蚝油/调味酱产能分别为 286/120/40 万吨，未来根据业务发展保持合理有序产能规划；②国际化进展：2025 年国际化战略有序推进，\u201c全球标准 + 区域适配\u201d双轨路径，高明基地 BRCGS 评级从 B 提升至 A 级，海外生产基地同步落地；③股东回报：2025 年合计现金分红占净利润 112.95%，制定《2025-2027 年股东回报规划》；④渠道变革：线上销售为重要渠道之一，合同负债年末变动与发运实际情况有关，与线上占比无必然关系；⑤醋料酒布局：重点布局品类，已有技术和产品储备，将根据市场有计划推出新产品",
+      highlights: "产能：酱油 286 万吨 + 蚝油 120 万吨 + 调味酱 40 万吨。国际化：产品销往全球 80+ 国家，连续两年入选\u201c外国人喜爱的中国品牌\u201d，高明基地 BRCGS 评级 B→A，海外生产基地落地。分红：2025 年分红占净利润 112.95%，制定三年股东回报规划。市值管理：员工持股计划释放核心管理层及骨干员工自驱力。",
+      guidance: "①海外业务处于有序发展阶段，业务初期数据暂未单独列示；②将持续推进海外渠道建设，务实走好海外发展每一步；③坚持以用户为中心推动全域精耕，构建多元立体销售网络；④继续精耕调味品赛道，持续做深做强",
+      extra: "结合发酵技术、原料优势积累，对产品线适当外延如饮料产品。醋料酒是公司重点布局品类，已打造不少销量较好的产品。"
+    }]
+  },
+  {
+    id: "zhongju", name: "中炬高新", code: "600872.SH", sector: "食品饮料", sub: "厨邦品牌基础调味料+复合调味料（2026并购味滋美）",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026年4月20日投资者关系活动记录",
+      metrics: [
+        { label: "2026Q1营收", val: "13.2亿 (+19.88%)", trend: "up" },
+        { label: "2026Q1归母", val: "2.63亿 (+45.11%)", trend: "up" },
+        { label: "调味品毛利率", val: "42% (历史最高)", trend: "up" },
+        { label: "经营现金流", val: "3.44亿 (+192%)", trend: "up" },
+        { label: "渠道库存", val: "2.5倍以下", trend: "up" },
+        { label: "动销改善", val: "10%+", trend: "up" },
+        { label: "大股东增持", val: "近4亿元", trend: "up" },
+        { label: "回购计划", val: "3-6亿元", trend: "up" },
+        { label: "并购味滋美", val: "2026年3月并表", trend: "up" }
+      ],
+      tags: ["营收+19.88%","净利+45.11%","毛利率42%历史最高","并购味滋美","现金流+192%"],
+      focus: "①2025年下半年业务明显好转，渠道库存降至2.5倍以下，终端动销环比改善10%以上；②2026Q1营收13.2亿(+19.88%)，归母2.63亿(+45.11%)，调味品毛利率42%创历史最高；③2026年初并购味滋美，3月1日起并表；④推行“强基、多样、高效”管理主题，数据驱动营销策略；⑤火炬集团增持近4亿成为控股股东，公司宣布3-6亿回购计划",
+      highlights: "2025年底渠道库存降至2.5倍以下（行业健康线以下），终端动销环比改善10%以上，主要单品价格基本恢复。2026Q1合并营收13.2亿(+19.88%)，归母2.63亿(+45.11%)，调味品板块毛利率42%(历史最高)，经营性现金流3.44亿(+192.16%)。味滋美2026年3月1日起并表。火炬集团2025下半年增持近4亿成为控股股东，公司宣布3-6亿回购计划，董事长个人增持。",
+      guidance: "①2026年持续深化'强基、多样、高效'管理，从渠道、价格、场所、促销提升体系能力；②五个省渠道建设为重点，结合基础+复合调味品战略优化渠道体系；③聚焦重点产品，开发创新品类，分阶段匹配促销和组织资源；④成立效能管理中心，构建大供应链模式；⑤建立原材料价格监控体系，每周发布趋势预告，制定成本上涨预案，视情况触发提价",
+      extra: "味滋美以川式复合调味料为主营，专注B端餐饮定制化服务，与厨邦基础调味料形成互补，是'再造一个厨邦'战略重要举措。基础调味品增长抓手：渠道推动(经销商健康体检表)、终端普查(填补终端空白)、产品策略优化(摒弃跟随策略)。华东因渠道布局合理增长较快，华南受价格修复影响增长较慢。多元化战略：餐饮及团餐渠道探索切入，内容电商合资公司2026年积极推进落地。董事长总结：2026Q1已呈现业绩拐点，要求所有经销商实现盈利，优化ROE/ROS表现。"
+    }]
+  },
+  {
+    id: "yili", name: "伊利股份", code: "600887.SH", sector: "食品饮料", sub: "中国乳业龙头（液奶+奶粉+奶酪+冷饮）",
+    records: [{
+      date: "2026-05", type: "业绩会", title: "2026 年 5 月 30 日投资者交流",
+      metrics: [
+        { label: "2025 归母", val: "115.7 亿 (+56.8%)", trend: "up" },
+        { label: "2025 营收", val: "1346.29 亿 (+3.42%)", trend: "up" },
+        { label: "2025 分红", val: "88.8 亿 (77.6%)", trend: "up" },
+        { label: "2026Q1 营收", val: "348.25 亿 (+5.47%)", trend: "up" },
+        { label: "2026Q1 净利率", val: "6.4%", trend: "up" },
+        { label: "销售费用率", val: "-2.3pct", trend: "up" },
+        { label: "奶粉 2025", val: "营收翻倍", trend: "up" },
+        { label: "奶粉 2026 目标", val: "占营收 5-10%", trend: "up" },
+        { label: "冷饮 2025", val: "98.22 亿 (双位数增)", trend: "up" },
+        { label: "冷饮市占", val: "连续 15 年第一", trend: "up" },
+        { label: "全家享奶粉", val: "份额 +21pct", trend: "up" },
+        { label: "成人营养品", val: "双位数增长", trend: "up" },
+        { label: "To B 加工", val: "第二增长曲线", trend: "up" },
+        { label: "婴配粉", val: "市占稳步提升", trend: "up" },
+        { label: "1+2+3 战略", val: "产品创新", trend: "up" }
+      ],
+      tags: ["净利 +56.8%", "分红 77.6%", "奶粉翻倍", "冷饮 15 连冠", "To B 第二曲线"],
+      focus: "①2025 年归母 115.7 亿 +56.8%，营收 1346.29 亿 +3.42%，分红 88.8 亿占 77.6%；②2026Q1 营收 348.25 亿 +5.47%，净利率 6.4%，销售费用率降 2.3pct；③奶粉 2025 年触底翻倍，2026 年目标占营收 5-10%；④冷饮 98.22 亿双位数增，连续 15 年市占第一；⑤全家享奶粉份额 +21pct，成人营养品双位数增；⑥1+2+3 产品创新战略，To B 加工食品为第二增长曲线",
+      highlights: "2025 年净利 +56.8% 创新高，分红比例 77.6% 创上市以来最高。奶粉业务翻倍增长，全家享份额 +21pct 稳居第一。冷饮 15 连冠，2026Q1 延续双位数增。销售费用率降 2.3pct 驱动净利率回升。液体乳、奶粉、冷饮三大主业全面恢复增长。",
+      guidance: "①奶粉 2026 年占比 5-10%，成人粉/婴配粉双轮驱动；②冷饮保持双位数增长，巩固第一；③To B 加工食品为第二增长曲线，10% 利润目标非上限；④液奶高端化 + 封闭渠道专属产品；⑤海外深耕东南亚 + 试水非洲 + 新西兰高附加值转型",
+      extra: "原奶价格低位运行利好成本端。2026 年 Q1 净利环比改善明显。成人营养品焕活系列（银发族）、倍瑞肌（职场青年）双位数增。奶酪 To B 营收 +20%+，深加工线投产。现制茶饮对包装奶替代进入峰值。"
+    },
+      { date: "2025-08", type: "业绩会", title: "2025年中期业绩会",
+      metrics: [
+        { label: "液奶营收", val: "361亿", trend: "up" },
+        { label: "奶粉营收", val: "166亿/+14%", trend: "up" },
+        { label: "冷饮营收", val: "82亿/+12%", trend: "up" },
+        { label: "整体毛利率", val: "36.05%/+1.1pct", trend: "up" },
+        { label: "销售费用率", val: "18.3%/-1.1pct", trend: "up" },
+        { label: "全年利润率", val: "9%目标不变", trend: "up" },
+        { label: "分红", val: "不低于70%", trend: "up" },
+        { label: "非传统渠道", val: "液奶近30%", trend: "up" },
+        { label: "海外收入", val: "双位数+", trend: "up" }
+      ],
+      tags: ["9%利润率目标","奶粉166亿","费用率降1.1pct","非传统渠道30%"],
+      focus: "①全年9%利润率提升目标不变（上半年销售费用率降1.11pct）；②液奶下半年策略：高端化创新(功能奶)+高质价比(封闭渠道专属)，奶粉/奶酪/冷饮保持双位数/20%+增长；③2024年份额承压→2025年'新兴渠道突破+产品差异化'修复，线下+电商份额均第一；④一阶段奶粉增速超30%全渠道最快，16亿生育补贴计划聚焦孕妈妈；⑤奶酪To B上半年营收+20%+，下半年深加工线投产(原质奶酪/乳铁蛋白)；⑥非传统渠道(电商+会员店+社区团购+零食折扣店)占液奶近30%；⑦分红不低于净利润70%，预期分红额稳定或提升",
+      highlights: "液奶361亿市占率第一。奶粉166亿(+14.26%)，婴幼儿奶粉零售额市占跃居全国第一，成人粉市占26.1%稳居第一。冷饮82亿(+12.4%)市占第一。低温白带品类营收+20%+。新品优酸乳嚼柠檬带动优酸乳营收双位数增长。山姆定制低温乳饮贡献显著增量。海外业务双位数增长。金领冠5月登陆香港万宁。",
+      guidance: "①下半年液奶追平并超越行业恢复速度；②奶价回升→中小品牌低价竞争空间收窄→龙头优势凸显；③即时零售/零食折扣店/会员店推定制化产品；④海外深耕东南亚(CA joy冷饮)+试水非洲+新西兰/荷兰/澳大利亚高附加值转型；⑤若消费需求超预期复苏将冲刺更高业绩",
+      extra: "现制茶饮对包装奶替代进入相对峰值(外卖补贴不可持续)。奶粉及奶制品占比从5年前11%提升至27%。自研菌种突破+清洁标签。奶酪To B上半年+20%+，吸奶油凭'品质领先+成本优势'推动国产替代。"
+    }]
+  },
+  {
+    id: "xinxianru", name: "新乳业", code: "002946.SZ", sector: "食品饮料", sub: "低温奶区域龙头",
+    records: [{
+      date: "2024-11", type: "业绩会", title: "三季报+电话交流会",
+      metrics: [
+        { label: "Q1-3收入", val: "81.5亿", trend: "down" },
+        { label: "Q1-3收入YoY", val: "-0.54%", trend: "down" },
+        { label: "Q1-3净利", val: "4.74亿", trend: "up" },
+        { label: "Q1-3净利YoY", val: "+24.37%", trend: "up" },
+        { label: "扣非净利", val: "5.07亿", trend: "up" },
+        { label: "扣非YoY", val: "+29.5%", trend: "up" },
+        { label: "净利率", val: "+1ppt", trend: "up" },
+        { label: "奶源自控", val: "60%+", trend: "up" },
+        { label: "低温品类", val: "重点发力", trend: "up" }
+      ],
+      tags: ["净利+24%","扣非+29.5%","低温战略","奶源自控60%+"],
+      focus: "①收入下滑但利润高增的结构性改善（净利率提升超1ppt）；②10-11月终端动销无明显复苏；③低温品类（鲜奶+特色酸奶）为毛利率增长核心驱动力；④原奶价格复苏预期（中性看法明年下半年）",
+      highlights: "Q1-3收入81.5亿（-0.54%），归母净利4.74亿（+24.37%），扣非净利5.07亿（+29.5%）。毛利率提升主要来自成本贡献+产品结构优化。60%+奶源自控（自建+参股牧场），30%来自大型牧场长期协议。明年收入目标保持正增长。",
+      guidance: "①10-11月终端动销无明显复苏；②原奶复苏中性预期明年下半年；③明年收入保持正增长+净利率提升；④重点发力低温品类；⑤财务费用率有下降空间（经营现金流偿还负债）",
+      extra: "低温产品竞争优势体现在战略坚持+供应链配合+新品推广。明年奶价复苏可能减少毛利率贡献，但销售费用减少有助于净利率提升。"
+    }, {
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1营收", val: "28.43亿", trend: "up" },
+        { label: "Q1营收YoY", val: "+8.31%", trend: "up" },
+        { label: "Q1归母净利", val: "1.86亿/+39.89%", trend: "up" },
+        { label: "Q1扣非净利", val: "1.91亿/+35.73%", trend: "up" },
+        { label: "低温品类", val: "双位数增长", trend: "up" },
+        { label: "新品收入占比", val: "双位数", trend: "up" },
+        { label: "DTC模式", val: "表现良好", trend: "up" },
+        { label: "活润全国化", val: "北京/上海/大湾区", trend: "up" },
+        { label: "益生菌", val: "营养食品+功能性产品", trend: "up" }
+      ],
+      tags: ["Q1净利+40%","鲜立方战略","低温双位数","活润全国化","DTC模式"],
+      focus: "①26Q1营收28.43亿(+8.31%)，归母净利1.86亿(+39.89%)，扣非1.91亿(+35.73%)，利润端高增；②鲜立方战略持续推进，低温鲜奶品类保持双位数增长；③新品收入占比双位数，活润系列推出开心芭、轻食瓶/轻食杯迭代升级；④重点品牌唯品/活润贡献突出，DTC模式表现良好；⑤活润全国化加速推进（北京、上海、大湾区、四川），益生菌业务定位为营养食品产业和功能性产品重要组成部分",
+      highlights: "2025年报+2026Q1业绩亮眼，Q1归母净利大增近40%，收入稳健增长超8%。鲜立方战略驱动低温品类双位数增长，新品持续迭代（活润开心芭、轻食瓶/轻食杯）。DTC模式表现良好，唯品、活润作为重点品牌持续发力。活润全国化布局加速拓展至北京、上海、大湾区等核心市场。益生菌业务作为营养食品和功能性产品战略布局持续推进。",
+      guidance: "①持续深耕低温鲜奶赛道，巩固鲜立方战略优势；②活润全国化拓展，加快核心市场布局；③持续推出创新新品，保持新品收入双位数占比；④深化DTC模式，提升直连消费者能力；⑤益生菌业务布局营养食品和功能食品赛道；⑥关注原奶价格变化对利润端的影响",
+      extra: "低温奶区域龙头，坚持鲜奶战略差异化竞争。DTC（Direct-to-Consumer）模式打通消费者直连链路。活润系列作为重点品牌矩阵持续迭代升级。益生菌业务定位为公司未来营养食品和功能食品产业的重要布局。"
+    }]
+  },
+  {
+    id: "zhongshengmu", name: "中国圣牧", code: "01432.HK", sector: "食品饮料", sub: "有机奶源上游（蒙牛核心供应商85%）",
+    records: [{
+      date: "2024-12", type: "调研", title: "2024年12月一对一交流",
+      metrics: [
+        { label: "牛群规模", val: "与年初持平", trend: "neutral" },
+        { label: "成母牛占比", val: "45-46%→25年50%+", trend: "up" },
+        { label: "有机奶", val: "80%+", trend: "up" },
+        { label: "饲料成本", val: "降幅双位数", trend: "up" },
+        { label: "现金流", val: "~10亿", trend: "up" },
+        { label: "负债率", val: "~50%", trend: "neutral" },
+        { label: "未动用授信", val: "~90亿", trend: "up" },
+        { label: "公允价值亏损", val: "H1~4亿", trend: "down" },
+        { label: "融资成本", val: "~2.5%", trend: "up" }
+      ],
+      tags: ["有机奶龙头","成本双位数下降","现金流10亿","未动用授信90亿"],
+      focus: "①年底牛群数量与年初持平，淘汰低效成母牛保留后备牛，成母牛占比45-46%→25年预计超50%接近55%；②80%+有机奶，奶价走势与市场一致但降幅更低，24年H1降幅大6月中稳定；③全年饲料成本降幅双位数(大宗价格下降+单产增加)，24年下降约3毛/公斤；④经营性现金流全年~10亿，资本开支23年/24年七八个亿→25年明显下降；⑤负债率~50%(行业最低)，主要债务为长期，融资成本~2.5%，未动用授信~90亿；⑥H1公允价值亏损~4亿(集中淘汰)，单头牛估值行业最低下行期亏损影响小；⑦销售给蒙牛比例~85%，有机大部分给蒙牛",
+      highlights: "有机奶占比80%+，奶价降幅低于市场。饲料成本全年降幅双位数。行业最低负债率+最低融资成本+90亿未动用授信保障资金安全。资本开支25年明显下降。明年毛利率预计好于今年。供需缺口超5%，出清趋势未变。",
+      guidance: "①明年奶价低位中枢运行波幅不大，年底或26年可能恢复；②明年毛利率好于今年+销量略增→盈利规模不会很大；③资本开支保持低水平；④肉牛价格底部回升提升淘牛意愿→推动原奶供需平衡",
+      extra: "青贮收购量同比+10-15%(天气影响质量略降)，社会牧场青贮收购量同比减少(资金压力+淘汰牛只需求减少)。24年H1散奶低于2元，内蒙维持2.5元左右。政策方面购牛补贴可能不再持续。"
+    }]
+  },
+  {
+    id: "xiaran", name: "优然牧业", code: "02479.HK", sector: "食品饮料", sub: "原奶供应龙头+饲料(60万头牛群)",
+    records: [{
+      date: "2024-12", type: "调研", title: "2024年12月一对一交流",
+      metrics: [
+        { label: "牛群规模", val: "60万头", trend: "up" },
+        { label: "公斤奶饲料", val: "2.1元", trend: "up" },
+        { label: "公斤奶成本", val: "2.8元", trend: "up" },
+        { label: "下半年产量", val: "中个位数增", trend: "up" },
+        { label: "全年原奶产能", val: "双位数增长", trend: "up" },
+        { label: "公允价值", val: "H1~24亿", trend: "down" },
+        { label: "青贮价格", val: "降10%+", trend: "down" },
+        { label: "存栏变化", val: "降20万头", trend: "down" },
+        { label: "自由现金流", val: "明年转正", trend: "up" }
+      ],
+      tags: ["60万头牛群","公斤奶成本2.8元","行业去产能","自由现金流转正"],
+      focus: "①牛群60万头，主动下降后备牛增速，年底与年中持平，明年中个位数增长；②下半年产量中个位数增长(1-2牧场投产)，全年原奶产能双位数增长，聚焦优质客户+提升自有品牌市占率；③Q3奶价持续下降但11月企稳，特色奶价格稳定普通奶随行就市；④公斤奶饲料成本2.1元+销售成本2.8元，行业优势明显；⑤原奶毛利率环比平稳，饲料毛利率微降(促销+成本下降)；⑥H1公允价值变动~24亿(与去年持平)，成母牛+后备牛估值下降；⑦经营现金流持续增长，资本开支收缩，自由现金流预计明年转正；⑧与伊利三年一签长期协议(不低于原奶总产量框架)，奶价随行就市",
+      highlights: "行业整体向好，下半年产量中个位数增长。公斤奶全成本2.8元行业领先。青贮采购量下降价格同比降10%+。行业奶牛存栏降20万头(实际可能更多)，中小牧场存栏减半。新品开发和肉牛肉养市场投入增加寻找新增长点。",
+      guidance: "①原奶产量明年中双位数增长；②自由现金流预计明年转正；③25年奶价上半年平稳下半年稳中有升；④饲料成本若平稳则成母牛估值25H2回升；⑤牛肉价格回升→淘牛提升→加速出清",
+      extra: "奶价下行超三年行业亏损严重产能去化加速。规模牧场存栏数下降明显(4000头→2000头)。消费端政府推动学生奶+机关原奶进入等措施。"
+    }]
+  },
+  {
+    id: "xiandaimumu", name: "现代牧业", code: "01117.HK", sector: "食品饮料", sub: "规模化奶牛养殖(蒙牛核心供应商92%)",
+    records: [{
+      date: "2024-12", type: "调研", title: "2024年12月一对一交流",
+      metrics: [
+        { label: "存栏量", val: "年底49-50万头", trend: "up" },
+        { label: "成母牛占比", val: "52%→58%", trend: "up" },
+        { label: "饲料成本", val: "1.8元/kg(明年)", trend: "up" },
+        { label: "毛利率", val: "扩张1-2pct", trend: "up" },
+        { label: "公允价值", val: "18-19亿", trend: "down" },
+        { label: "销量", val: ">290万吨", trend: "up" },
+        { label: "有机奶", val: "8万吨", trend: "up" },
+        { label: "单产", val: "12.8→13吨", trend: "up" },
+        { label: "EBITDA", val: "~27亿", trend: "up" }
+      ],
+      tags: ["49万头存栏","饲料成本1.8元","毛利率扩张","明年H1出清"],
+      focus: "①年底成母牛存栏49-50万头(去年45万)，成母牛占比52%→未来目标58%；②全年奶价跌幅高单位数至双位数，预计明年H1较大幅度出清奶价跌低单位数，明年H2企稳，2026年供不应求；③饲料成本从1.98元/kg降至1.8元/kg(青贮便宜80+元/吨+锁单)，毛利率扩张1-2pct；④公允价值损失18-19亿(多淘2万头牛)，销量超290万吨(有机奶贡献8万吨下半年并表)；⑤单产12.8吨→明年13吨；⑥供给蒙牛92%(去年93%)+新希望8%，长期协议(最早20年一签)；⑦全年EBITDA~27亿，经营现金流~28亿；⑧资产负债率~63%(年底)，计划明年开始降低负债；⑨今年喷粉仅几千吨(影响几千万)，明年尽量少喷",
+      highlights: "饲料成本1.8元/kg行业领先(小牧场贵2-3毛/公斤+财务成本明显更高)。单产13吨行业标杆。有机奶下半年并表贡献8万吨。现金成本H1 3.3-3.4元/kg。",
+      guidance: "①明年H1社会牧场一波出清(三个坎：青贮未收+春节后供应商挤兑+还债压力)；②明年奶价低单位数跌幅+饲料成本1.8元→毛利扩张1-2pct；③明年H2奶价企稳→2026年大幅缺奶；④明年自由现金流基本打平；⑤喷粉量少对利润影响小",
+      extra: "小牧场三大坎：青贮今年没收(供应大股东牧场400+个受影响)；春节后淡季北方持续；供应商挤兑牧场还债。委托管理牧场做委托贷款。"
+    }]
+  },
+  {
+    id: "wuliangye", name: "五粮液", code: "000858.SZ", sector: "食品饮料", sub: "浓香白酒龙头(产品矩阵变革)",
+    records: [{
+      date: "2025-12", type: "调研", title: "2025年12月独立调研",
+      metrics: [
+        { label: "25年两大问题", val: "已解决", trend: "up" },
+        { label: "26年春节", val: "动销更好", trend: "up" },
+        { label: "一商一策", val: "经销商不吃亏", trend: "up" },
+        { label: "停货手段", val: "效果减弱", trend: "neutral" },
+        { label: "1618定位", val: "八代普五护城河", trend: "up" },
+        { label: "1618目标", val: "2-3年百亿", trend: "up" },
+        { label: "一见倾心", val: "年轻化战略", trend: "up" },
+        { label: "经典/紫气东来", val: "国际化品牌", trend: "up" },
+        { label: "800-1000价位", val: "绝对垄断", trend: "up" }
+      ],
+      tags: ["25年解决两大问题","1618百亿目标","年轻化战略","国际化"],
+      focus: "①25年解决两大问题：a.自己承压解决合作伙伴库存和业绩压力；b.践行承诺一商一策细致调研政策补贴保障大部分经销商不吃亏；②26年开门红：需求难判断但25年停货手段效果减弱(不认同一刀切停货)，25年两大问题解决打基础→26年春节动销一定比25年春节更好；③普五：认为普五市场份额和掌控力进一步增强，800-1000元价位占更庞大市场和各地份额绝对垄断；④1618：定位八代普五护城河，2-3年百亿规模目标，组织团队独立，低度化(独立专业队伍+经销商构建百亿级势能成新增长极)；⑤高端化&国际化：26年可能启用更高端产品(经典/紫气东来)全球一体化塑造品牌，对标山崎核心树立品牌心智占位；⑥年轻化：一见倾心拨乱反正(产品设计/渠道定价/营销模式/消费者培育/品牌传播)，未来是长期战略；⑦浓香酒：全球因地制宜构建产品矩阵，部分区域以浓香牵引布局，浓香和五粮液进一步测试组合营销",
+      highlights: "25年主动承压解决经销商库存和业绩压力。一商一策政策补贴保障经销商不吃亏。不认同一刀切停货方式。26年春节动销有信心好于25年。",
+      guidance: "①26年考虑三点：政策环境(官媒喊话限制逐步放松)+市场反馈(春节动销价格体系有信心)+营销变革效果；②实事求是顺势而为；③普五800-1000价位绝对垄断；④1618组织独立+百亿目标；⑤一见倾心长期战略",
+      extra: "25年停货手段效果在减弱。公司不认同一刀切停货方式解决问题。通过解决25年两大问题打下基础。"
+    }]
+  },
+  {
+    id: "guihou", name: "贵州茅台", code: "600519.SH", sector: "食品饮料", sub: "A股白酒之王(市场化转型中)",
+    records: [{
+      date: "2025-12", type: "调研", title: "2025年12月独立调研",
+      metrics: [
+        { label: "核心原则", val: "消费者为中心", trend: "up" },
+        { label: "投放策略", val: "精准科学", trend: "up" },
+        { label: "量价平衡", val: "供需适配", trend: "up" },
+        { label: "渠道减负", val: "增活力", trend: "up" },
+        { label: "产品定位", val: "差异化", trend: "up" },
+        { label: "普茅策略", val: "减少投放", trend: "neutral" },
+        { label: "线上线下", val: "融合互补", trend: "up" },
+        { label: "新客群", val: "新经济新业态", trend: "up" },
+        { label: "三店一馆", val: "科学布局", trend: "up" }
+      ],
+      tags: ["市场化转型","渠道减负","量价平衡","精准投放"],
+      focus: "①总原则：消费者为中心+线上线下协同+精准投放+供需适配量价平衡；②26年投放计划中适当减少高附加值产品量，更精准界定普茅/精品/陈年不同客群和消费场景；③让产品价格随行就市(价格过高过低都易波动)，专卖店成消费者'第一选择'；④聚焦'哪里买'：构建线上线下融合+传统现代互补渠道网络，用好i茅台，逐步引入有实力诚信合规新电商平台；⑤聚焦'谁来买'：拥抱新经济拓展新客群，紧盯新经济/新业态商务消费+家宴场景；⑥科学布局'三店一馆'(旗舰店/形象店/专卖店/文化体验馆)，构建综合性防伪技术体系；⑦抵制炒作行为，通过合理利润分配+长期价值共创实现渠道健康发展良性循环",
+      highlights: "虽行业整体承压，通过开拓消费场景+整合渠道资源组合拳促进动销，市场保持稳态。传统消费主力需求减弱但市场空间广阔(新旧动能转换+新兴产业+中产扩大)。消费者需求转变但品质与美好生活追求契合。更加聚焦家庭场景。",
+      guidance: "①让市场更稳(长期主义+供需适配+价格合理)；②让渠道更活(线上线下融合+新经济新客群)；③让服务更优(三店一馆+防伪+四师团队+绩效考核)；④坚定市场化方向取得实实在在成效",
+      extra: "建立专业团队加大'四师'(文化宣讲师/品饮师/侍酒师/调酒师)建设。深化厂商协同抵制炒作。合理利润分配实现渠道良性循环。"
+    }]
+  },
+  {
+    id: "shuijingfang", name: "水井坊", code: "600779.SH", sector: "食品饮料", sub: "次高端白酒(主动控货稳价)",
+    records: [{
+      date: "2026-02", type: "调研", title: "2026年2月独立调研",
+      metrics: [
+        { label: "25年收入", val: "下滑40%", trend: "down" },
+        { label: "停货时间", val: "7-8月", trend: "neutral" },
+        { label: "臻酿八号", val: "占收入70-80%", trend: "up" },
+        { label: "正常价", val: "300元", trend: "neutral" },
+        { label: "最低价", val: "210+元", trend: "down" },
+        { label: "26年Q1", val: "力争同比增", trend: "up" },
+        { label: "精简SKU", val: "保留井台+八号", trend: "up" },
+        { label: "裁员", val: "200人(原2000)", trend: "neutral" },
+        { label: "水晶坊", val: "景十八替代", trend: "up" }
+      ],
+      tags: ["主动控货40%","保住价值链","景十八400元","创富合伙人"],
+      focus: "①25年6月因经销商及自身原因导致价格混乱(臻酿八号正常300元低至210+)，7月停货主导产品(臻酿八号/井台等)；②25年收入下滑40%核心是保住价值链避免价格崩盘；③26年Q1力争同比增长(内部信心表述)，Q1动销符合预期，库存水平有考核要求避免压货；④精简SKU：保留井台/臻酿八号，停止生产菁翠/典藏(库存卖完即止)；⑤产品序列化：天号陈(两三百元基数大增速快25年下跌少)→水晶品牌含臻酿八号(70-80%收入)/景十八(替代老景芝400元5年基酒+80年调味)/景二十八(替代新景芝更高端)→第一坊(玻璃800+陶瓷1400+品牌形象不走量)；⑥渠道：景十八精选400家经销商(16省)推行'创富合伙人计划'(托底保障经销商盈利)；⑦降本增效：25年裁员200人(原2000人)→26年继续推行人员费用减少",
+      highlights: "主动控货保价值链避免价格崩盘。26年Q1动销符合预期。产品序列化清晰(天号陈→水晶系列→第一坊)。创富合伙人计划托底经销商。",
+      guidance: "①若Q1实现增长二三四季度压力较小；②26年继续降本增效；③品牌推广促销等必要费用仍会投入；④业绩考核兼顾收入+利润+现金流+库存(库存是销售人员奖金重要考核指标)",
+      extra: "老景芝/新景芝等滞销产品交予一家经销商清库存。菁翠/典藏库存卖完即止不再生产。"
+    }]
+  },
+  {
+    id: "luzhou", name: "泸州老窖", code: "000568.SZ", sector: "食品饮料", sub: "浓香白酒(国窖+特曲双品牌)",
+    records: [{
+      date: "2026-02", type: "调研", title: "2026年2月独立调研",
+      metrics: [
+        { label: "25年结构", val: "无大变化", trend: "neutral" },
+        { label: "受影响排序", val: "高档>中档>低档", trend: "down" },
+        { label: "核心市场", val: "80%份额", trend: "up" },
+        { label: "华北华东", val: "更有韧性", trend: "up" },
+        { label: "开瓶返利", val: "优化考核", trend: "up" },
+        { label: "动作付费", val: "新增", trend: "up" },
+        { label: "双百亿目标", val: "四川+河北", trend: "up" },
+        { label: "华东差距", val: "缩小中", trend: "up" },
+        { label: "老字号特曲", val: "200+元", trend: "neutral" }
+      ],
+      tags: ["深度调整期","开瓶返利","动作付费","双百亿基地"],
+      focus: "①25年前三季度降速(Q1不错5-6月调整幅度大)，产品结构无大变化受影响程度：高档酒(商务场景)>中档酒>低档酒；②市场集中度高(华北+西南四川+华东占80%)，高度区和低度区差异→华北和华东更有韧性；③经销商团队整体相对稳定但均面临压力(行业深度调整期与2012-2014相当，过去一瓶赚几十块→当前)；④渠道支持：a.供给克制；b.优化渠道政策调整考核方式(从单纯考核量价转向开瓶返利+增加动作付费)；⑤核心市场拓展：四川+河北计划发展为双百亿基地市场(目前均未完成)，成都等占有优势区域仍有较大空白市场；⑥华东市场过去与竞品差距10:1→经几年拓展差距缩小但仍与品牌地位不符；⑦老字号特曲价格从100+→最高300→当前200+，承担品牌复兴重担；⑧26年春节动销：部分25年量集中到春节1月计入Q1，利好+不利因素并存目前平淡",
+      highlights: "行业深度调整期与2012-2014年相当。考核从量价转向开瓶返利+动作付费。四川+河北双百亿基地目标。华东差距缩小但仍大。老字号特曲200+元承担品牌复兴。",
+      guidance: "①供给克制+优化考核保渠道生态良性；②双百亿基地市场空白仍大；③华东战略继续推进；④26年春节动销利好不利因素并存",
+      extra: "调整级别与2012-2014年深度调整期相当。部分25年量集中到春节时间点1月计入Q1。"
+    }]
+  },
+
+  // ───── 农业 ─────
+  {
+    id: "guaiombao", name: "乖宝宠物", code: "301498.SZ", sector: "农业", sub: "国产宠物食品龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026 年一季报交流",
+      metrics: [
+        { label: "2025 收入", val: "67.7 亿/+29%", trend: "up" },
+        { label: "自有品牌占比", val: "73%", trend: "up" },
+        { label: "主粮增速", val: "+53.79%", trend: "up" },
+        { label: "2026Q1 净利", val: "-39.5%", trend: "down" },
+        { label: "泰国关税", val: "19%→10%", trend: "up" },
+        { label: "美国关税", val: "45%→35%", trend: "up" },
+        { label: "弗列加特", val: "40% 占比", trend: "up" },
+        { label: "抖音 ROI", val: "3.8-4.0", trend: "up" },
+        { label: "Kynohata", val: "2500+ 原料", trend: "up" }
+      ],
+      tags: ["收入 67.7 亿","自有品牌 73%","Q1 净利 -39.5%","泰国关税 10%"],
+      focus: "①2025 年收入 67.7 亿（+29%），自有品牌占比提升至 73%，主粮增速 53.79%；②2026Q1 净利下滑 39.5% 系高基数、关税及战略投入所致；③核心战略：市占率优先于短期利润，处于\u201c结构升级\u201d期，目标自有品牌高端化；④技术壁垒：依托 Kynohata 数字生命库实现数据驱动研发；⑤产能布局：泰国、新西兰及国内 4.0 工厂持续扩产；⑥渠道策略：抖音定位兴趣流量引爆场，自播 + 货架占比 70%，ROI 维持 3.8-4.0；⑦国际化：美国对华宠物食品关税从 45% 降至 35%，泰国出口关税降至 10%",
+      highlights: "2025 年营收 67.7 亿（+29%），自有品牌收入 49.65 亿（占比 73%），主粮收入 17.75 亿（+53.79%），零食收入 25.38 亿。按销售模式划分，直销业务收入 27.38 亿（占比 40%），经销模式 39%。2026Q1 收入 16.03 亿（+11.58%），归母净利 1.24 亿（-39.50%），主因高基数 + 关税 + 战略投入。",
+      guidance: "①高端化与品牌升级方向不变；②短中期追求高费用率换市占率；③自有品牌通过数据驱动研发建立差异化壁垒；④泰国工厂关税优势（10% vs 国内 35%）利好代工业务；⑤抖音渠道维持高 ROI，自播 + 货架占比持续提升",
+      extra: "2025 年销售费用增长主要源于三方面：高端品牌弗列加特投放、To C 销售团队扩充、品牌建设投入。Kynohata 数据库拥有 2500 余种原料数据、1300 余种营养数据，基于犬猫先天基因构造完成配方精准营养。"
+    }, {
+      date: "2025-11", type: "调研", title: "聊城乖宝工业园联合调研",
+      metrics: [
+        { label: "双 11 GMV", val: "~11 亿", trend: "up" },
+        { label: "GMV 目标", val: "10 亿", trend: "up" },
+        { label: "弗列加特", val: "+50%+", trend: "up" },
+        { label: "麦富迪", val: "稳居前列", trend: "up" },
+        { label: "双 11 占比", val: "20%+", trend: "up" },
+        { label: "抖音", val: "弗列加特突出", trend: "up" },
+        { label: "费用", val: "理性投放", trend: "up" },
+        { label: "自有品牌", val: "主力", trend: "up" },
+        { label: "宠物", val: "高景气", trend: "up" }
+      ],
+      tags: ["双 11 近 11 亿","弗列加特 +50%","理性投放","国产龙头"],
+      focus: "①双 11 GMV 近 11 亿（原定 10 亿目标，略超预期）；②弗列加特增速亮眼（双 11+50%+，1-10 月数据比双 11 更好）；③费用投放理性（不盲目砸费用冲排名）；④双 11 销售额占全年自有品牌约 20%+（日常销售基础扎实）；⑤麦富迪稳居前列，弗列加特增速亮眼",
+      highlights: "双 11 GMV 近 11 亿（超 10 亿目标），略超预期。弗列加特双 11 期间增速 50%+，1-10 月整体数据比双 11 期间更好。抖音平台弗列加特增速更突出。双 11 销售额占全年自有品牌销售约 20%+。麦富迪主要把握大盘节奏，保持稳定表现。不会为冲刺排名盲目砸费用。",
+      guidance: "①长期健康增长比短期排名更重要；②日常销售基础扎实，不依赖大促节点；③不同平台策略有差异（抖音弗列加特突出，麦富迪稳定大盘）",
+      extra: "宠物行业高景气，国产替代加速。乖宝为国产宠物食品龙头，自有品牌占比持续提升。"
+    }, {
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1路演·香港/上海",
+      metrics: [
+        { label: "2025营收", val: "67.7亿", trend: "up" },
+        { label: "营收增速", val: "~30%", trend: "up" },
+        { label: "自有品牌收入", val: "~50亿", trend: "up" },
+        { label: "自有品牌增速", val: "+40%+", trend: "up" },
+        { label: "自有品牌占比", val: "73%+", trend: "up" },
+        { label: "主粮增速", val: "+53%", trend: "up" },
+        { label: "主粮占比", val: "61%+", trend: "up" },
+        { label: "代工收入", val: "~18亿", trend: "up" },
+        { label: "代工增速", val: "+6%+", trend: "up" },
+        { label: "26Q1营收", val: "16.4亿", trend: "up" },
+        { label: "Q1营收增速", val: "+11%", trend: "up" },
+        { label: "代工毛利率", val: "32%", trend: "down" },
+        { label: "整体毛利率", val: "小幅提升", trend: "up" },
+        { label: "泰国产能", val: "2.4万吨", trend: "up" },
+        { label: "泰国利用率", val: "90%", trend: "up" },
+        { label: "四期规划", val: "+5万吨", trend: "up" }
+      ],
+      tags: ["自有品牌73%","主粮+53%","市占率优先","结构升级期","泰国扩产","WarmData"],
+      focus: "2025营收67.7亿（~30%），自有品牌近50亿（+40%+，占比73%+），主粮增速超53%（占比61%+），弗列加特和BARF霸弗增速大幅跑赢。代工18亿（+6%+，部分转移至泰国）。26Q1营收16.4亿（+11%），代工承压（高基数+人民币升值+结构优化）。整体毛利率小幅提升（自有品牌占比提升），代工毛利率降至32%。销售费用率抬升（抢占份额阶段投入）。",
+      highlights: "自有品牌占比提升至73%+，主粮占比61%+。WarmData天性犬猫研究大数据中心（十年积累，基因/行为/环境三维解读），从经验驱动→数据驱动品类创新。弗列加特三相剥离技术+酶解技术聚焦鲜肉精准营养。泰国产能利用率90%（不含三期），三期+8000吨达2.4万吨，四期规划+5万吨。国内高端主粮5亿元投资（2027年30万吨），新西兰9.5亿元（一期3.5亿，2027年达产，总5万吨冻干/湿粮/保健品）。2026资本开支4亿，2027年1亿。",
+      guidance: "①市占率优先于短期利润（抢占份额阶段）；②品类创新根基在研发数据（WarmData）；③每品牌细分赛道做到第一→总和自然第一；④泰国四期2026启动（烘焙/冻干/湿粮高附加值）；⑤市值管理：回购/增持/分红传递信心；⑥麦富迪定位天性营养科学标准制定者；⑦线下从铺货广度→精品标杆店",
+      extra: "目标客群年轻人消费高端化，教育消费者费用是必要投入。市占率逻辑从'有猫有狗就有麦富迪'→'解码天性更懂犬猫'。BARF霸弗丛林食谱还原野外饮食结构优化肠道环境。代工业务优化客户及产品结构应对美国关税。管理层坚持战略定力不被股价波动牵着走。"
+    }]
+  },
+  {
+    id: "peidi", name: "佩蒂股份", code: "300673.SZ", sector: "农业", sub: "宠物零食 ODM+ 自主品牌",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "受海外冲击", trend: "down" },
+        { label: "2026展望", val: "重回增长", trend: "up" },
+        { label: "新西兰主粮", val: "天猫国际上线", trend: "up" },
+        { label: "国内品牌", val: "佩蒂智创", trend: "up" },
+        { label: "国内盈利", val: "尚未盈利", trend: "neutral" },
+        { label: "新西兰工厂", val: "禽流感影响", trend: "down" },
+        { label: "原材料", val: "2025平稳/2026平稳", trend: "neutral" },
+        { label: "关税", val: "影响逐渐降低", trend: "up" },
+        { label: "双轨主粮", val: "新西兰+国内", trend: "up" },
+        { label: "分红", val: "三年≥30%", trend: "up" }
+      ],
+      tags: ["海外冲击","新西兰主粮","爵宴品牌","关税消退","主粮双轨","分红政策"],
+      focus: "①2025年主营业务收入受海外市场短期冲击，预计2026年重回增长轨道；②新西兰主粮SmartBalance/Vivaland已在天猫国际上线，后续一般贸易进口；③佩蒂智创(国内运营主体)尚未盈利；④新西兰主粮工厂2025年受禽流感影响出货量；⑤原材料(禽畜肉类/生牛皮/淀粉)2025年平稳，2026年预计平稳；⑥美国关税影响总趋势逐渐降低，预期稳定后市场恢复常态增长",
+      highlights: "双轨主粮布局：新西兰高端差异化产品线+国内高品质创新主粮。核心优势：功能性食品研发+全球化产能+海内外头部客户战略合作+30年从业积淀。海外产能布局日益完善+市场多元化+自有品牌+主粮第二曲线应对关税挑战。管理精益化+差异化高品质产品+快速响应打造综合竞争优势。",
+      guidance: "①2026年重回增长轨道；②新西兰主粮后续通过一般贸易正式进口，线上线下全渠道；③持续深耕主粮赛道双轨布局；④研发前瞻布局主粮安全健康+差异化；⑤外汇风险管理应对关税；⑥坚定执行分红回报规划(最近三年现金分红≥30%可分配利润)",
+      extra: "成熟的海外市场渠道和优质客户资源+全球化供应链与卓越制造能力+行业较高研发投入+经验丰富管理团队构筑竞争护城河。"
+    }, {
+      date: "2025-11", type: "调研", title: "杭州调研",
+      metrics: [
+        { label: "Q4订单", val: "环比略增", trend: "up" },
+        { label: "ODM", val: "恢复中", trend: "up" },
+        { label: "国内", val: "亏损收窄", trend: "up" },
+        { label: "新西兰", val: "亏损中", trend: "down" },
+        { label: "新客户", val: "开拓中", trend: "up" },
+        { label: "关税", val: "影响消退", trend: "up" },
+        { label: "毛利", val: "上升", trend: "up" },
+        { label: "需求", val: "恢复", trend: "up" },
+        { label: "宠物零食", val: "出海", trend: "up" }
+      ],
+      tags: ["ODM恢复","新客户开拓","毛利上升","关税消退"],
+      focus: "①Q4订单环比略增，ODM恢复中；②新客户开拓（欧洲国际品牌12月出货，美国俱乐部客户）；③国内业务去年亏3000万，今年亏损收窄；④新西兰业务亏四五千万；⑤ODM毛利有上升趋势",
+      highlights: "Q4订单环比略增。关税影响后基本恢复正常。开拓欧洲国际品牌客户（12月出货），美国增加俱乐部/商超客户。Q4开始客户数量增加，明年Q1新客户陆续下单弥补ODM缺口。去年净利润1.8亿（国内亏3000万），今年Q3已达1.1亿。新西兰业务今年亏4-5千万。整体毛利有上升趋。",
+      guidance: "①海外需求恢复确定性高；②新客户Q4增加→Q1下订单弥补ODM缺口；③国内亏损收窄；④ODM毛利上升趋势",
+      extra: "宠物零食ODM出口为主，海外需求逐步恢复。"
+    }]
+  },
+  // ───── 宠物（新增） ─────
+  {
+    id: "tianyuan-pet", name: "天元宠物", code: "301335.SZ", sector: "农业", sub: "宠物用品全品类+食品",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度网上业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "30.02亿(+8.61%)", trend: "up" },
+        { label: "2025净利", val: "5884万(+28%)", trend: "up" },
+        { label: "扣非净利", val: "4676万(+53%)", trend: "up" },
+        { label: "26Q1净利", val: "同比-20%", trend: "down" },
+        { label: "有效专利", val: "372项", trend: "up" },
+        { label: "销售费用", val: "+37.37%", trend: "down" },
+        { label: "越南项目", val: "笼具建设中", trend: "up" },
+        { label: "并购淘通", val: "审核中止/加期中", trend: "neutral" }
+      ],
+      tags: ["宠物全品类","并购淘通","越南产能","IP联名"],
+      focus: "①2025营收30亿(+8.61%)，净利5884万(+28%)，扣非+53%；②26Q1净利同比-20%（销售费用增加+汇兑损失）；③并购淘通科技（电商服务商），审核中止为常规流程（财务资料过期），加期审计中；④越南笼具项目建设中，完善海外供应链；⑤销售费用+37.37%（市场推广+电商前置投入）；⑥有效专利372项+软著56项",
+      highlights: "扣非净利+53%增长。并购淘通科技将显著提升营收和净利（全域电商服务商协同）。越南笼具项目完善全球供应链。IP联名（长安二十四计/葡萄牙法国国家队授权）。Petstar自有品牌+玛氏/雀巢代理。2026年中期分红规划。",
+      guidance: "①并购淘通科技恢复审核后推进；②越南笼具项目投产贡献业绩；③拓展跨境电商/社交电商新兴场景；④推进自有品牌建设+IP联名产品创新；⑤优化全球产能布局+内外贸协同；⑥外汇套期保值管理汇率风险",
+      extra: "猫砂产品出口日本。智能宠物用品（喂食/互动玩具/定位）研发中。国内宠物行业规模3126亿（2025）。深耕宠物领域二十余年。"
+    }]
+  },
+  {
+    id: "muyuan", name: "牧原股份", code: "002714.SZ", sector: "农业", sub: "生猪养殖龙头（自繁自养模式）",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1交流会+中金香港交流日",
+      metrics: [
+        { label: "26Q1营收", val: "298.94亿", trend: "neutral" },
+        { label: "26Q1归母", val: "-12.15亿", trend: "down" },
+        { label: "Q1商品猪", val: "1836.2万头", trend: "up" },
+        { label: "能繁母猪", val: "312.9万头", trend: "neutral" },
+        { label: "1-2月成本", val: "~12元/kg", trend: "up" },
+        { label: "3月成本", val: "11.6元/kg", trend: "up" },
+        { label: "Q2成本展望", val: "继续下降", trend: "up" },
+        { label: "资产负债率", val: "50.73%(↓3.42ppt)", trend: "up" },
+        { label: "负债总额", val: "↓31亿", trend: "up" },
+        { label: "货币资金", val: "142.70亿", trend: "up" },
+        { label: "Q1屠宰量", val: "827.9万头(+55.6%)", trend: "up" },
+        { label: "产能利用率", val: ">100%", trend: "up" },
+        { label: "头均盈利", val: "~20元", trend: "up" },
+        { label: "PSY", val: "2025年28.3", trend: "up" },
+        { label: "全年资本开支", val: "<100亿", trend: "up" },
+        { label: "超短融", val: "10亿/利率1.65%", trend: "up" },
+        { label: "港股", val: "已发行", trend: "up" }
+      ],
+      tags: ["成本11.6元","PSY28.3","屠宰+56%","负债率50.7%","海外越南菲律宾","超短融1.65%"],
+      focus: "①26Q1营收298.94亿，归母-12.15亿（猪价同比下降）；②3月完全成本降至11.6元/kg，Q2预计继续下降；③销售商品猪1836.2万头，能繁母猪312.9万头；④屠宰板块Q1盈利，产能利用率>100%，头均盈利~20元；⑤资产负债率50.73%(2021年中以来最低)，负债总额↓31亿，货币资金142.70亿；⑥港股发行+10亿超短融(利率1.65%)夯实资金储备；⑦全年资本开支控制在100亿以下",
+      highlights: "降本路径清晰：健康管理(疾病防控净化+智能化)+人员管理(标准化+精细化管理)。PSY从2024年26.7提升至2025年28.3，当前28+，兼顾综合效益最大化（非单一指标）。屠宰肉食成为核心增长点，聚焦鲜肉+分割品比例提升+定制化高附加值。海外有序推进：越南落地养殖产能，菲律宾探索。能繁母猪连续9个月下降至3904万头，供需改善。口蹄疫防控体系完善：四级空气过滤+智能洗消+全天候监测。",
+      guidance: "①Q2成本继续下降，全年降本增效有信心；②屠宰板块提升产能利用率和盈利水平；③优化客户/产品结构（商超/餐饮/食品加工）；④加大种猪育种投入（育种中心已投用）；⑤智能化兽医/育种模型缩小内部离散度；⑥现金流安全为首要目标；⑦海外多元化发展（收并购/合营）",
+      extra: "连续生产、均衡出栏策略。成本结构中折旧摊销等非现金占比~10%。多元化融资：多期低成本债券。行业自2024年7月以来能繁母猪存栏连续9个月下降，供需逐步改善。"
+    }]
+  },
+  {
+    id: "huatong", name: "华统股份", code: "002840.SZ", sector: "农业", sub: "生猪养殖+屠宰一体化",
+    records: [{
+      date: "2025", type: "调研", title: "联合调研",
+      metrics: [
+        { label: "法系占比", val: "30-40%", trend: "up" },
+        { label: "法系PSY", val: "28", trend: "up" },
+        { label: "美系PSY", val: "22-23", trend: "down" },
+        { label: "成本降幅", val: "1元/kg", trend: "up" },
+        { label: "小猪成本", val: "-100+/头", trend: "up" },
+        { label: "猪价", val: "1H25有利润", trend: "up" },
+        { label: "代养", val: "30-130kg", trend: "up" },
+        { label: "代养成本", val: "<7元/斤", trend: "up" },
+        { label: "成活率", val: "+8pct", trend: "up" }
+      ],
+      tags: ["法系替换","成本降1元","1H25盈利","代养模式"],
+      focus: "①法系种猪替换美系（PSY从22-23→28，成本降1元/kg）；②小猪成本-100+/头；③猪价1H25仍有较好利润；④代养模式（保育30kg→代养至130kg）；⑤浙江准入政策降低非瘟风险",
+      highlights: "法系占比30-40%，PSY 28 vs 美系22-23。替换后成本降1元/kg。小猪成本-100多/头。猪价上升幅度不会很高，1H25还有较好利润。代养模式：保育30kg后在代养处长到130kg，江西是重点区域（非瘟后风险大），每个农户3000-5000头。代养成本不超过7元/斤。浙江即将严格猪准入。",
+      guidance: "①法系替换降本空间仍大；②1H25仍有较好利润；③浙江严格准入可能提高当地猪价",
+      extra: "产业链延伸到屠宰+肉类加工+饲料。品牌端逐步推进。"
+    }]
+  },
+  {
+    id: "jinlongyu", name: "金龙鱼", code: "300999.SZ", sector: "农业", sub: "农产品加工龙头",
+    records: [{
+      date: "2026-02", type: "调研", title: "金龙鱼大厦调研",
+      metrics: [
+        { label: "原料价格", val: "平稳", trend: "neutral" },
+        { label: "C端高端", val: "20-30%", trend: "up" },
+        { label: "油脂", val: "高于米面", trend: "up" },
+        { label: "利润率下滑", val: "B端提升", trend: "down" },
+        { label: "大豆", val: "短期难涨", trend: "down" },
+        { label: "米市占率", val: "<3%", trend: "neutral" },
+        { label: "包装米", val: "<10%", trend: "up" },
+        { label: "行业", val: "竞争激烈", trend: "down" },
+        { label: "新项目", val: "初期亏损", trend: "down" }
+      ],
+      tags: ["原料平稳","C端高端化","米占比提升","竞争加剧"],
+      focus: "①原料价格下行/平稳利于运营（大豆北美季供应充足、南美预计丰产）；②C端高端产品（胡姬花等）双位数增长；③低端（30%）用户下沉增速快，中端（40-50%）增速较差；④大米市占率不足3%，包装米占比不到10%，长期增量空间大",
+      highlights: "过去三年原料价格整体下行，2026年预计保持平稳（有利运营）。C端高端占20-30%，双位数增长；低端（30%）用户下沉增速快；中端（40-50%）增速较差。大米市占率不足3%，行业包装米占比不到10%，长期增量空间大。利润率近年下滑核心原因：B端占比提升拉低盈利水平、原料波动、新项目初期亏损、需求疲软+竞争加剧。",
+      guidance: "①2026年原料价格平稳有利运营；②向健康油种升级；③大米采用'吃干榨尽'策略；④关注印尼生柴政策对油脂的影响",
+      extra: "2019年高盈利得益于原料平稳+需求不错，2020年C端囤货需求达毛利峰值。"
+    }]
+  },
+  {
+    id: "suken", name: "苏垦农发", code: "601952.SH", sector: "农业", sub: "农业综合开发",
+    records: [{
+      date: "2026-03", type: "调研", title: "南京调研",
+      metrics: [
+        { label: "口粮", val: "需求下行", trend: "down" },
+        { label: "供给", val: "缓慢增", trend: "neutral" },
+        { label: "成本", val: "油价上行", trend: "down" },
+        { label: "CPI", val: "关键变量", trend: "neutral" },
+        { label: "粮价", val: "2023高点", trend: "down" },
+        { label: "通缩", val: "2021起下行", trend: "down" },
+        { label: "油价", val: "成本影响大", trend: "down" },
+        { label: "输入通胀", val: "变量", trend: "neutral" },
+        { label: "政策", val: "保基础农田", trend: "up" }
+      ],
+      tags: ["通缩周期","油价变量","口粮下行","供给增"],
+      focus: "①CPI走势是核心变量；②口粮需求下降（主食量减少）；③供给缓慢增加（保基础农田+单产提高）；④油价上行→成本端压力（化肥/农药/机械作业都与油价相关）",
+      highlights: "通缩从2021年房地产调控开始下行。2023年为粮食价格高点后回落。口粮需求往下走（速度不快）。供给端保基础农田+单产提高→价格走低正常。汽油/柴油调价+氮肥/尿素出口停止。按通胀模型：贵金属→工业金属→化工→农产品，粮价与石油相关度高。",
+      guidance: "①油价横盘100美元附近影响持续存在；②粮价与油价相关性显著；③CPI走势决定消费相关领域",
+      extra: "国内需求偏小。输入性通胀若能把中国从通缩拉出，有积极影响。"
+    }]
+  },
+
+  // ───── 美护（新） ─────
+  {
+    id: "kesi", name: "科思股份", code: "300856.SZ", sector: "美护", sub: "防晒剂全球龙头",
+    records: [{
+      date: "2026-03", type: "调研", title: "2026年3月联合调研",
+      metrics: [
+        { label: "传统防晒", val: "毛利20%+触底", trend: "up" },
+        { label: "新型防晒", val: "毛利30%/高峰50%+", trend: "down" },
+        { label: "PA/PS/EHT", val: "~20万/吨", trend: "down" },
+        { label: "OCT出货", val: "3000吨", trend: "up" },
+        { label: "PO出货", val: "300→600-700吨", trend: "up" },
+        { label: "物理防晒", val: "小几十→100-200吨", trend: "up" },
+        { label: "马来工厂", val: "1万吨/Q2出货", trend: "up" },
+        { label: "整体毛利率", val: "~30%", trend: "up" },
+        { label: "需求", val: "26年同比增", trend: "up" }
+      ],
+      tags: ["价格触底","马来工厂Q2","PO高增","传统防晒恢复"],
+      focus: "①传统防晒剂2025下半年价格触底，毛利20%+；新型防晒价格触底，Q1同比降~20%，毛利30%（高峰50%+）；②PA/PS/EHT单价~20万/吨，OCT产能3-4千吨出货~3000吨；③PO 2025出货~300吨→2026预计600-700吨（单价20万/吨），规划产能3000吨有效1000+吨；④物理防晒2025小几十吨→2026预计100-200吨贡献增量；⑤马来工厂总产能1万吨满产产值5-6亿，预计2026Q2出货初期承接北美传统防晒订单；⑥传统防晒竞争格局稳固基本无新增产能，新型供应商偏多中小厂未出清；⑦欧洲能源价格飙升→当地化工产能收缩可能带来替代机遇",
+      highlights: "分产品线：传统防晒触底恢复（2025下半年起），新型防晒仍在低位但销量增长显著。头部客户认证壁垒高+科思份额稳固。欧洲能源飙升→化工产能收缩→替代机遇。",
+      guidance: "①2026年整体订单及收入规模同比增长；②成本端：原油/大宗传导滞后1-2季度，长协成本涨超5%可调价；③马来工厂Q2出货初期承接北美传统防晒；④整体毛利~30%（新型高于传统），1Q26受汇率/原料波动利润率可能较4Q25无显著改善",
+      extra: "欧洲能源价格飙升下当地化工产能收缩可能带来替代机遇。原料以国内供应为主/少量进口，供应风险小。"
+    }]
+  },
+  {
+    id: "leshuzhi", name: "乐舒适", code: "未上市", sector: "轻工", sub: "非洲一次性卫生用品龙头",
+    records: [{
+      date: "2025-11", type: "调研", title: "广州调研",
+      metrics: [
+        { label: "H1收入", val: "+19%", trend: "up" },
+        { label: "非洲工厂", val: "10家", trend: "up" },
+        { label: "关税优势", val: "20-25%", trend: "up" },
+        { label: "采购成本", val: "低8-10%", trend: "up" },
+        { label: "运费", val: "同行70%", trend: "up" },
+        { label: "市占率", val: "50-60%", trend: "up" },
+        { label: "出口", val: "+50%", trend: "up" },
+        { label: "拉美", val: "新开拓", trend: "up" },
+        { label: "增长目标", val: "中双位数", trend: "up" }
+      ],
+      tags: ["非洲10厂","市占率50-60%","关税优势","拉美扩张"],
+      focus: "①到年底新增2家非洲工厂（总数10家）；②关税优势（进口关税20-25%，原材料仅0-5%）；③采购成本比同行低8-10%，运输价为同行70%；④市占率提升至50-60%；⑤重点开拓拉美（秘鲁工厂年底投产）",
+      highlights: "H1收入同比+19%，全年增速预计更高。非洲工厂总数达10家。关税+采购成本+运输价格三重优势。东非/西非低双位数增长，新开拓区域高双位数增长（中非最快），北非/南非出口业务。中长期目标：中双位数平均增速。",
+      guidance: "①非洲人口+GDP增长创造10%+行业增长惯性；②规模效应+品牌渠道优势提升市占率；③秘鲁工厂年底投产覆盖拉美",
+      extra: "23-24年未新建工厂，24年为存量增长。"
+    }]
+  },
+  {
+    id: "beijiajie", name: "倍加洁/善恩康", code: "603059.SH", sector: "美护", sub: "口腔护理+AKK益生菌",
+    records: [{
+      date: "2026-03", type: "调研", title: "宿州善恩康调研",
+      metrics: [
+        { label: "AKK产能", val: "40吨/年", trend: "up" },
+        { label: "26年产能", val: "100吨", trend: "up" },
+        { label: "研发费用率", val: "10%+", trend: "up" },
+        { label: "AKK专利", val: "11项", trend: "up" },
+        { label: "菌株库", val: "1.5万+", trend: "up" },
+        { label: "零售价", val: "9000元/kg", trend: "up" },
+        { label: "大客户", val: "京东京造等", trend: "up" },
+        { label: "领先", val: "半年到一年", trend: "up" },
+        { label: "AKK", val: "二代益生菌", trend: "up" }
+      ],
+      tags: ["AKK专利第一","产能翻倍","菌株库1.5万","领先半年+"],
+      focus: "①AKK菌产业化领先对手半年到一年（25年底原菌粉40吨→26年6-7月理论产能100吨）；②AKK相关授权发明专利11项（中国第一）；③1.5万+菌株库，30多株明星菌株产业化；④差异化定价（9000元/kg零售价→5000-7000元/kg菌株转让）；⑤代工客户包括京东京造、斯利安、妈咪爱等",
+      highlights: "AKK属于二代益生菌，在代谢调节等方面具功效（发表Nature/Science/Cell）。25年底产能40吨，26年6-7月理论产能100吨（实际50-60吨，活性损失）。扩产资本开支3000万+。菌株转让+约定年度采购量5000-7000元/kg。冷门菌株折扣。",
+      guidance: "①产业化领先至少半年到一年；②结合临床领先更久；③定制化案例（仙乐、swisse、马应龙等）",
+      extra: "善恩康研发费用率10%+，在上市公司报表中体现。"
+    }]
+  },
+  {
+    id: "haoyue", name: "豪悦护理", code: "603511.SH", sector: "轻工", sub: "纸尿裤ODM龙头",
+    records: [{
+      date: "2025-12", type: "调研", title: "2025年12月联合调研",
+      metrics: [
+        { label: "10月生产量", val: "微正", trend: "up" },
+        { label: "代工价格", val: "连续降价", trend: "down" },
+        { label: "答菲", val: "10月盈亏平衡", trend: "up" },
+        { label: "答菲11-12月", val: "预计盈利", trend: "up" },
+        { label: "洁婷", val: "达播亏", trend: "down" },
+        { label: "竞争", val: "竞品拦截", trend: "down" },
+        { label: "泰国", val: "婴儿→成人", trend: "up" },
+        { label: "ODM压力", val: "很大", trend: "down" },
+        { label: "电商退货", val: "很高", trend: "down" }
+      ],
+      tags: ["代工降价","答菲盈亏平衡","洁婷达播亏","泰国拓品"],
+      focus: "①往年双十1备货8月中-11月忙→今年没看到旺季，10月生产量跟Q3差不多微正但价格下跌；②25年从Q1末开始逐个系列调价，今年降幅比去年大（去年降1次今年在去年的基础上又降），代工经营压力很大；③答菲运行较好，10月实现盈亏平衡，11-12月预计盈利，但全年仍亏，放量快投入有产出；④洁婷前期投入多推广高毛利新品，达播越多亏越多（坑位费+提成+退货率高），日常店播高毛利送赠品不亏，洁婷今年利润压力大，315后行业关注度高，竞品投流拦截；⑤泰国原来只卖婴儿产品→现在成人产品也过去（康福瑞品牌），明年拓品类，先抢份额",
+      highlights: "代工业务：没有传统旺季，价格连续调整经营压力大。答菲：10月盈亏平衡，全年仍亏损但放量快有产出。洁婷：达播必亏（坑位费+提成+高退货），店播可赚，竞品投流拦截竞争加剧。泰国：婴儿→成人→明年拓品类，依托现有渠道抢份额。",
+      guidance: "①答菲投入有产出，放量继续；②泰国先抢占份额，比同行更有优势；③洁婷调整投放策略",
+      extra: "达播坑位费+销售额提成+高退货率=必亏。日常店播高毛利送赠品可不亏。竞品在投流时直接拦截竞争加剧。"
+    }]
+  },
+  {
+    id: "taiyangzhi", name: "太阳纸业", code: "002078.SZ", sector: "轻工", sub: "文化纸+包装纸龙头（林浆纸一体化）",
+    records: [{
+      date: "2026-02", type: "调研", title: "2026年2月独立调研",
+      metrics: [
+        { label: "25年资本开支", val: "7-80亿", trend: "up" },
+        { label: "26年资本开支", val: "<50亿", trend: "down" },
+        { label: "浆自给率", val: "60%+", trend: "up" },
+        { label: "自制浆成本", val: "3800-3900/吨", trend: "up" },
+        { label: "海外浆价", val: "620美元/吨", trend: "down" },
+        { label: "老挝木片", val: "<90美元/吨", trend: "up" },
+        { label: "老挝浆成本", val: "便宜1000/吨", trend: "up" },
+        { label: "老挝林地", val: "<7万公顷", trend: "up" },
+        { label: "文化纸开工", val: "<50%", trend: "down" }
+      ],
+      tags: ["林浆纸一体化","老挝基地","浆价强势","行业出清"],
+      focus: "①接单策略：不覆盖成本不接，产品灵活切换（铜版/双胶/箱板/文化纸快速切换）；②玖龙文化纸投产影响：24年10月+25年10月纸价两创新低（4000/吨出头），但再低没人能覆盖现金流；③行业开工率：文化纸<50%，白卡~60%，落后产能仍在停机；④林浆纸一体化：老挝<7万公顷林地，年轮伐7-8000公顷产30-35万吨木片，18年前10年实际出材量低于预期（预计150吨/公顷实际40-60吨）；⑤自制浆3800-3900/吨（不超过4000），海外浆620美元/吨（折合4500-4600），浆价涨利好自给率60%+；⑥箱板纸：山东90%高端产品盈利好，老挝以美废160+美元/吨能盈利；⑦文化纸不赚钱但吨纸盈利50-100元，招标只看价格头部反而劣势",
+      highlights: "产能扩张：25年7-80亿资本开支→26年下降到50亿内（两个项目下半年投产）。浆纸一体化：自制浆比外采浆便宜1000元/吨（老挝免税+运费省）。浆价逻辑：60%自给率希望浆价上涨（小企业成本升开工更低）。文化纸底部徘徊但淘汰落后产能加速。箱板纸高端产品盈利好。",
+      guidance: "①26年山东颜店60万吨化学浆+70万吨高端包装纸，总投资50亿；②明年资本开支继续下降；③老挝浆纸一体化下一步规划（超10万公顷考虑上浆线）；④出口方向：老挝箱板纸直接销东南亚，未来中东/印度/欧洲布局；⑤海外浆价3月前强势，4-5月可能小幅波动看纸价传导",
+      extra: "文化纸招标模式以前是优势但现在只看价格反而成了劣势。美国市场只剩几家大企业（地少人稀原料丰富，废弃纸厂种树进入轮伐期原料丰富）。国内只有广西有桉木林地产能有限。纸浆投资壁垒大（30亿+投资+碱回收配套）。"
+    }]
+  },
+
+  // ───── 纺服（新） ─────
+  {
+    id: "anta", name: "安踏体育", code: "02020.HK", sector: "纺服", sub: "中国最大体育用品集团",
+    records: [{
+      date: "2026-03", type: "业绩会", title: "2026年Q1经营交流",
+      metrics: [
+        { label: "安踏大货", val: "线下中单位数", trend: "up" },
+        { label: "安踏大货", val: "线上中双位数", trend: "up" },
+        { label: "FILA", val: "全渠道高单位数", trend: "up" },
+        { label: "迪桑特", val: "30%+", trend: "up" },
+        { label: "可隆", val: "50%+", trend: "up" },
+        { label: "儿童品类", val: "显著回暖", trend: "up" },
+        { label: "FILA折扣", val: "9折+", trend: "up" },
+        { label: "安踏折扣", val: "线下72/线上5", trend: "neutral" },
+        { label: "指引", val: "全年不变", trend: "neutral" }
+      ],
+      tags: ["FILA高增","迪桑特+30%","可隆+50%","三月放缓"],
+      focus: "①FILA'回归米兰'战略落地（冬奥装备+米兰时装周高端系列+缪斯套装/柔云家族/波波令爆款）；②迪桑特/可隆延续高端高质量增长（折扣9折+）；③灯塔店改造推动加盟恢复正增长（全年新增200家，年底500家）；④三月明显放缓，春节错峰拉动一二月的结构性效应；⑤全年指引不变，若Q2持续超预期将在中报动态评估更新",
+      highlights: "安踏大货线下中单位数增长，线上中双位数增长。FILA全渠道高单位数增长。迪桑特30%+、可隆50%+高速增长，折扣均维持9折以上。儿童品类春节拉动显著回暖。FILA客单价提升至1900元、连带率稳步上升。安踏线下折扣72折、线上5折，库销比<5个月。Nike中国区订单下滑→控折扣策略对行业价格体系产生积极影响。",
+      guidance: "①'确定性应对不确定性'：品牌向上+商品革新+零售升级；②全年流水/净利指引不变；③若二季度起经营表现持续超预期且可见性增强，中报将动态更新指引；④3月已现明显放缓，后续增长需观察外部不确定性",
+      extra: "三层增长飞轮逻辑：规模型基本盘(安踏)+高端差异化矩阵(FILA/迪桑特/可隆)+新兴孵化品牌(MYA)。气温偏暖带动春夏提前销售，线上回暖但平台竞争激烈，地缘政治带来原材料成本不确定性。"
+    }]
+  },
+  {
+    id: "lining", name: "李宁", code: "02331.HK", sector: "纺服", sub: "国产专业运动品牌",
+    records: [{
+      date: "2026-03", type: "业绩会", title: "近期经营近况交流",
+      metrics: [
+        { label: "Q1流水", val: "中高单位数", trend: "up" },
+        { label: "收入指引", val: "高单位数", trend: "up" },
+        { label: "线下折扣", val: "低单位数加深", trend: "down" },
+        { label: "线上折扣", val: "低单位数加深", trend: "down" },
+        { label: "库销比", val: "4个月", trend: "up" },
+        { label: "三月", val: "偏弱", trend: "down" },
+        { label: "一月", val: "偏弱", trend: "down" },
+        { label: "二月", val: "好于预期", trend: "up" },
+        { label: "H2预期", val: "略快于H1", trend: "up" }
+      ],
+      tags: ["高单位数指引","折扣承压","库销比4月","下半年加速"],
+      focus: "①全年指引高单位数收入增长；②折扣压力（线上线下同比低单位数加深，建立在去年Q1高基数上）；③库销比健康可控（Q1末4个月）；④节奏上上半年不激进，下半年增速有机会略快（基数低+新店+户外/金标品类规模扩大）；⑤本质上未看到终端需求明显回暖",
+      highlights: "一季度不含同店的流水为中到高端增长，符合预期。1月缺春节偏弱，2月春节错位好过预期，3月虹吸效应+气温变化偏弱。折扣端有较大压力，流水符合预期也是折扣牺牲的结果。库销比去年底4个月，Q1末通常环比升高但仍可控。",
+      guidance: "①下半年增速有机会略快于上半年（基数低+新店主要下半年体现）；②后续季度折扣变化非常关键，关乎全年毛利率趋势；③动态管理库存/折扣/库销结构；④前置性专业资源投放对品牌建设有积极影响",
+      extra: "春节时间晚导致二月表现好但三月虹吸。去年Q1是唯一折扣同比改善的季度，今年建立在更高的折扣基数上。"
+    }]
+  },
+  {
+    id: "nike", name: "Nike (耐克)", code: "NKE.NYSE", sector: "纺服", sub: "全球运动品牌龙头（Win Now转型中）",
+    records: [
+      {
+        date: "2026-03", type: "业绩会", title: "FY2026 Q3 业绩会（2026.03.31）",
+        metrics: [
+          { label: "Q3营收同比", val: "持平", trend: "neutral" },
+          { label: "Q3毛利率", val: "40.2%(-130bps)", trend: "down" },
+          { label: "Q3 EPS", val: "$0.35", trend: "down" },
+          { label: "北美营收", val: "+3%", trend: "up" },
+          { label: "大中华区", val: "-10%", trend: "down" },
+          { label: "Running", val: "双位数增长", trend: "up" },
+          { label: "Nike MIND", val: "售罄/200万+预约", trend: "up" },
+          { label: "关税影响(北美)", val: "~300bps毛利率", trend: "down" },
+          { label: "Q4指引", val: "营收-2%至-4%", trend: "down" }
+        ],
+        tags: ["毛利率收窄130bps","北美全渠道正增长","MIND售罄","Q4大中华-20%"],
+        focus: "①毛利率降幅从Q1(-320bps)/Q2(-300bps)大幅收窄至Q3(-130bps)，剔除关税后实际改善，拐点信号明确；②北美2月份实现2年来首次全渠道正增长，Win Now行动验证有效；③Nike MIND平台售罄+200万预约+产量翻倍，创新驱动强劲；④大中华区Q4指引-20%，5,000+门店需翻新，转型路径最长；⑤Q2 FY2027预计为关税最后重大影响季度；⑥$230M一次性裁员为FY27释放杠杆",
+        highlights: "Q3营收$12.39B持平（固定汇率-3%），毛利率40.2%(-130bps)，EPS $0.35。北美+3%领跑（2月份全渠道正增长），EMEA -7%走弱，大中华区-10%持续承压，APLA -2%。Running连续三季度双位数增长，Global Football双位数增长（世界杯订单+40% vs 2022），Basketball高单位数，Sportswear仍在双位数下降但AF1/AJ1企稳。Nike MIND超150项专利售罄。关税年化增量成本$1.5B。CEO以巴塞罗那诺坎普为喻：'现在既要竞争又要建设'。投资者日2026年秋季举行，将提供全面长期展望+FY2027全年指引。",
+        guidance: "①Q4 FY26指引：营收-2%至-4%，毛利率-25至-75bps（含~250bps关税=剔除后扩张），SG&A持平至微降，大中华区约-20%；②九个月展望：营收低单位数下降，北美温和增长，大中华区持续下降；③Q2 FY2027为关税最后重大影响季度，之后利润率扩张；④Win Now行动预计2026年末完成，$4B+经典款缩编目标达成；⑤2027年春季首次看到9月重组后跨职能团队的产品创新成果",
+        extra: "Sportswear从防守转进攻：AF1/AJ1已企稳（月度正价实现率改善），Dunks仍在企稳中，绿芽——AJ11 Gamma/AJ5 Wolf Grey/Air Max 95正价销售强劲。EMEA任命新领导Cesar Garcia（25年Nike老将），重心从Sportswear依赖转向Performance。Nike Air首次用于服饰（自膨胀保暖层），Liquid Air Max新平台，AeroFit服饰'像为身体装了空调'（200%气流提升）。$230M裁员费用全部计入operating overhead，分供应链/技术/Converse三块。"
+      },
+      {
+        date: "2025-12", type: "业绩会", title: "FY2026 Q2 业绩会（2025.12.18）",
+        metrics: [
+          { label: "Q2营收同比", val: "+1%", trend: "up" },
+          { label: "Q2毛利率", val: "40.6%(-300bps)", trend: "down" },
+          { label: "Q2 EPS", val: "$0.53", trend: "up" },
+          { label: "北美营收", val: "+9%", trend: "up" },
+          { label: "大中华区", val: "-16%", trend: "down" },
+          { label: "Wholesale", val: "+8%", trend: "up" },
+          { label: "经典款缩编", val: "-20%+/$550M逆风", trend: "down" },
+          { label: "关税年化增量", val: "$1.5B", trend: "down" },
+          { label: "库存", val: "-3%金额/-高单位数单位", trend: "up" }
+        ],
+        tags: ["北美+9%领跑","中国-16%最需耐心","最佳黑五","关税$1.5B"],
+        focus: "①Q2结果'略好于90天前预期'但'远未达到潜力'，仍处于'回归的中段局'；②北美+9%领跑：Running高双位数+Kids/Basketball/Training均增长，Wholesale +24%；③Nike Digital回归高端：更少促销天数+更低折扣率=最佳Black Friday；Jordan Black Cat为史上最大黑五发布；④中国'以价格竞争的生活方式品牌'，正在根本性重置；⑤关税年化增量成本上调至$1.5B；FY26毛利率净影响~120bps（毛影响~320bps经对冲后净120bps）；⑥新COO任命Venkatesh Alighirasamy",
+        highlights: "Q2营收+1%（固定汇率持平），毛利率40.6%(-300bps)，EPS $0.53。北美+9%（Wholesale+24%），EMEA -1%，大中华区-16%（Digital-36%），APLA -4%。Running连续两季+20%+，Football订单+40% vs 2022。经典鞋类特许经营-20%+（~$550M逆风）。剔除经典款影响营收+6%。北美毛利率仅降330bps vs 520bps关税影响=剔除关税后实际改善。库存-3%（金额）/-高单位数（单位）健康去化。",
+        guidance: "①Q3 FY26指引：营收低单位数下降（含~3个百分点汇率利好），毛利率-175至-225bps（剔除315bps关税=扩张），SG&A低单位数增长；②北美温和增长（清算活动较前季减少）；③大中华区类似Q2趋势，逆风持续；④品牌行销投资稳定在~10%营收；⑤预期下半年从较少清库存中受益",
+        extra: "运动进攻12月1日EMEA地面团队到位，关键创收岗位重新招聘。中国Digital -36%（主动策略性收缩），Stores -5%，Wholesale -15%。大中华区EBIT -49%（含库存过时拨备，90天前未预料）。APLA: 拉美正增长但亚太承压。中国5,000+单品牌店需翻新，门店试点显示积极进展但需扩展前确认表现更好。"
+      },
+      {
+        date: "2025-09", type: "业绩会", title: "FY2026 Q1 业绩会（2025.09.30）",
+        metrics: [
+          { label: "Q1营收同比", val: "+1%", trend: "up" },
+          { label: "Q1毛利率", val: "42.2%(-320bps)", trend: "down" },
+          { label: "Q1 EPS", val: "$0.49", trend: "neutral" },
+          { label: "北美营收", val: "+4%", trend: "up" },
+          { label: "大中华区", val: "-10%", trend: "down" },
+          { label: "Running", val: "+20%+", trend: "up" },
+          { label: "经典款缩编", val: "-30%/目标$4B+", trend: "down" },
+          { label: "关税影响", val: "~120bps毛利率", trend: "down" },
+          { label: "Wholesale", val: "+5%", trend: "up" }
+        ],
+        tags: ["Running+20%+","经典款-30%","运动进攻启动","中国以价竞争"],
+        focus: "①CEO Elliott Hill上任11个月，Win Now五大优先领域（文化/产品/品牌行销/市场/地面团队）正在产生结果；②运动进攻（Sport Offense）：重组约8,000名员工，按品牌（Nike/Jordan/Converse）和运动项目重组为小型跨职能团队；③Running +20%+领跑，Pegasus/Structure/Vomero全线重设计成功；④经典鞋类特许经营下降约30%，目标累计缩编$4B+，Dunk在所有区域大幅缩减；⑤中国已成'以价格竞争的生活方式品牌'，需要根本性重置；5,000+单品牌店需翻新；⑥Nike品牌店入驻Amazon，参与度超预期；⑦SKIMS合作58款SKU首次亮相",
+        highlights: "Q1营收+1%（固定汇率-1%），毛利率42.2%(-320bps)，EPS $0.49。北美+4%（Wholesale+11%），EMEA+1%，大中华区-10%（Digital-27%），APLA+1%。Running增长>20%。Wholesale+5%，与合作伙伴关系恢复信任。Nike Direct -5%，Digital -12%。库存-2%。关税影响从此前年化增量成本~$1B上调至~$1.5B，FY26毛利率逆风从~75bps上调至~120bps。毛利率下降主因：更高批发折扣（经典款清理）+Nike Factory Store折扣增加+产品成本上升（含新关税）+渠道组合逆风。",
+        guidance: "①Q2 FY26指引：营收低单位数下降（含1个百分点汇率利好），毛利率下降约300-375bps（含175bps关税净影响），SG&A高单位数增长（品牌行销加速投入）；②不预期Direct本财年恢复增长，但未来应更健康更盈利；③预期下半年从较少清库存中受益；④品牌行销投资稳定在~10%营收",
+        extra: "SKIMS合作消费者反响积极。Amazon上线后参与度超预期。12个体育大事件激活品牌。各区域直接汇报CEO的架构调整。运动进攻从9月才开始，团队在不同时间线上提速。北美展示了综合方法的成功（Wholesale+Direct共同增长）。"
+      }
+    ]
+  },
+  {
+    id: "shenzhou", name: "申洲国际", code: "02313.HK", sector: "纺服", sub: "全球最大垂直一体化服装ODM",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年年报交流",
+      metrics: [
+        { label: "2025销售", val: "+8.1%", trend: "up" },
+        { label: "数量增长", val: "9.5%", trend: "up" },
+        { label: "RMB单价", val: "-0.9%", trend: "down" },
+        { label: "毛利率", val: "跌1.8pct", trend: "down" },
+        { label: "关税影响", val: "~0.5pct", trend: "down" },
+        { label: "汇率", val: "人民币+2.4%", trend: "down" },
+        { label: "Nike鞋面", val: "占比<1%", trend: "down" },
+        { label: "休闲类", val: "增速>运动类", trend: "neutral" },
+        { label: "客户分摊", val: "六四开", trend: "neutral" }
+      ],
+      tags: ["数量+9.5%","关税拖累0.5pct","人民币升值","Nike鞋面萎缩"],
+      focus: "①销售增长8.1%（数量9.5%抵消单价-0.9%）；②毛利率下跌1.8pct：关税约0.5pct+产品结构变化+汇率（人民币升2.4%）；③Nike鞋面业务萎缩（占比<1%，已摊销完）；④关税与客户分摊机制（零售端提价+品牌方承担+供应商承担，六四分摊三季度开始入账）；⑤近期国际局势动荡/上游涨价引发担忧，股价回调",
+      highlights: "销售额8.1%增长（数量9.5%，RMB单价-0.9%）。鞋面业务7-8年前开始做Nike翻面鞋，近年零售表现一般+库存一般，下跌幅度大但占比已<1%。毛利率下跌1.8pct：关税贡献约0.5pct，产品结构休闲>运动轻微不利，汇率人民币升2.4%。关税分摊四季度六四分摊开始入账。",
+      guidance: "①年终预期10%数量增长接近完成；②关税分摊机制与客户达成共识；③产品结构变化对毛利影响轻微；④关注国际局势和上游涨价后续影响",
+      extra: "四五六月份关税不明朗无法定价，三季度达成共识，四季度六四分摊开始入账。下半年毛利率低于预期主要受此影响。"
+    }]
+  },
+  {
+    id: "winfair", name: "赢家时尚", code: "03709.HK", sector: "纺服", sub: "高端女装品牌管理集团",
+    records: [{
+      date: "2026-03", type: "业绩会", title: "2025年年报业绩发布",
+      metrics: [
+        { label: "2025收入", val: "~63亿", trend: "down" },
+        { label: "收入降幅", val: "<5%", trend: "down" },
+        { label: "毛利率", val: "稳定略升", trend: "up" },
+        { label: "净利率", val: "下降", trend: "down" },
+        { label: "经营现金流", val: "+50%", trend: "up" },
+        { label: "汇兑收益", val: "2500万→660万", trend: "down" },
+        { label: "投资收益", val: "减少1500万", trend: "down" },
+        { label: "排期率", val: "+2-4pct", trend: "up" },
+        { label: "回购", val: "已执行", trend: "up" }
+      ],
+      tags: ["收入-5%","毛利率稳定","现金流+50%","非经营影响"],
+      focus: "①收入降幅不到5%（近63亿），在市场环境下表现正常；②毛利率稳定略升（高端品牌仍增产）；③净利率下降主要受非经营影响（汇兑收益从2500万降至660万+投资收益少1500万）；④经营现金流同比增长接近50%；⑤成立30周年，提出'三十而立，土木纳新'变革理念",
+      highlights: "营收近63亿（降幅<5%），毛利率稳定略升。高端品牌仍增产。经营现金流+50%正常增长。排期率比去年高出2-4pct（未计回购）。上市以来累计派息持续进行。2022年提出全新商品体系，2023年升级为中国品牌管理集团。不再开小店只开大店，全力推动向购物中心转型。",
+      guidance: "①把控投放节奏提升排期率；②只开大店+购物中心转型；③30周年变革期从下往上突破",
+      extra: "24/25两年内部业绩经历起伏变化，主动调整。"
+    }]
+  },
+
+  // ───── 户外装备 ─────
+  {
+    id: "lexin", name: "乐欣户外", code: "02720.HK", sector: "户外装备", sub: "全球钓鱼装备龙头（OBM+ODM）",
+    records: [{
+      date: "2026-03", type: "业绩会", title: "2025年年度业绩交流会",
+      metrics: [
+        { label: "2025收入", val: "6.62亿", trend: "up" },
+        { label: "收入YoY", val: "+15.5%", trend: "up" },
+        { label: "毛利额", val: "+22%", trend: "up" },
+        { label: "毛利率", val: "28.1%", trend: "up" },
+        { label: "净利润", val: "7387万", trend: "up" },
+        { label: "净利YoY", val: "+24.4%", trend: "up" },
+        { label: "净利率", val: "11.2%", trend: "up" },
+        { label: "OBM", val: "+30%+", trend: "up" },
+        { label: "全球份额", val: "23%/28.4%", trend: "up" }
+      ],
+      tags: ["净利+24%","毛利28.1%","全球份额23%","OBM+30%"],
+      focus: "①2026年2月10日港交所上市（上市后首次业绩发布）；②全球钓鱼装备市场份额第一（全球23%，全国28.4%），断崖式领先；③OBM自有品牌加速增长30%+（代工+品牌双轮驱动）；④三大品牌矩阵：Solar（英国历史品牌/欧洲国民品牌）、绝代宗师（东方美学）、F1NTACK（年轻潮流）；⑤2026年增长指引15-20%；⑥全球钓具行业2025-2029年CAGR 7.11%，2029年规模突破1941亿",
+      highlights: "收入6.62亿（+15.5%），毛利额+22%，毛利率28.1%创历史新高，净利7387万（+24.4%），净利率11.2%。OBM+30%+。SKU突破1万个。新增41台自动化设备，关键工序效率提升50%。产品远销40个国家，头部+腰部客户占比71.4%，2025年新增23名战略客户。欧洲钓竿项目孵化20个新项目。新品订单转化近1.5亿，新品收入贡献20%+。",
+      guidance: "①2026年目标15-20%增速；②目标维持毛利25-30%区间稳中有升；③品牌并购（品类互补+市场区域互补）；④全品类拓展（钓竿/鱼轮/鱼线钩）定位全场景户外；⑤绿色电力超150万kWh，启动'绿色价值链伙伴计划'",
+      extra: "中国钓鱼爱好者突破1.5亿人，年钓鱼人次6亿，人均消费200元/次→全年市场规模有望超1200亿。25-44岁中青年占比46%。新产品：CT碳纤维对准技术鱼竿（消除龙骨效应）、电动钓鱼推车（跨界电池技术）、EVA热压路亚包（分层+子母包）。"
+    }]
+  },
+
+  // ───── 美护（新） ─────
+  {
+    id: "kangnate", name: "康耐特光学", code: "02276.HK", sector: "美护", sub: "镜片定制龙头+智能眼镜光学模组",
+    records: [{
+      date: "2026-03", type: "业绩会", title: "2025年业绩说明会",
+      metrics: [
+        { label: "2025收入", val: "21.86亿", trend: "up" },
+        { label: "收入YoY", val: "+6.1%", trend: "up" },
+        { label: "自有品牌", val: "+12%/14.2亿", trend: "up" },
+        { label: "自有品牌占比", val: "65%", trend: "up" },
+        { label: "代工", val: "-2.9%/7.6亿", trend: "down" },
+        { label: "中国收入", val: "+15%/7.51亿", trend: "up" },
+        { label: "海外收入", val: "+2.1%/14.4亿", trend: "up" },
+        { label: "净利增速", val: "~30%", trend: "up" },
+        { label: "1.74折射率", val: "40%/占比47%", trend: "up" }
+      ],
+      tags: ["收入新高","自有品牌65%","中国+15%","净利~30%"],
+      focus: "①收入再创21.86亿新高（24年高基数+关税+人民币升值环境下）；②自有品牌增长12%至14.2亿（占比62%→65%），市场份额持续提升；③中国市场增长15%（B端客户38000家+18%，渠道覆盖率25%→27%）；④1.74折射率产品中国收入+40%（占比38%→47%）；⑤新业务开局年（智能眼镜光学模组/个性化定制镜片量产）；⑥欧洲+7.9%至3.4亿，美国+3.4%至4.9亿",
+      highlights: "收入21.86亿（+6.1%）创历史新高。自有品牌+12%至14.2亿（占比65%），代工-2.9%至7.6亿（占比38%→35%）。中国+15%至7.51亿，海外+2.1%至14.4亿。净利润维持30%左右增速。业务模式清晰划分为自有品牌和代工。1.74折射率在中国市场占比从38%提升至47%。",
+      guidance: "①新业务兑现价值（过去三年布局）；②智能眼镜光学模组注入成长动能；③扩展产品矩阵+升级制造工艺构筑护城河；④个性化定制镜片+智能眼镜双轮驱动",
+      extra: "2025年是新业务开局之年，多个在研项目按计划推进并逐步量产。"
+    }]
+  },
+
+  // ───── 纺服（原纪要公司补充） ─────
+  {
+    id: "huafu", name: "华孚时尚", code: "002042.SZ", sector: "纺服", sub: "色纺纱龙头+网链产业+算力",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报+2026Q1解读",
+      metrics: [
+        { label: "2025收入", val: "80.5亿", trend: "down" },
+        { label: "收入YoY", val: "-25.2%", trend: "down" },
+        { label: "纱线订单", val: "扭亏为盈", trend: "up" },
+        { label: "纱线毛利率", val: "+2pct+", trend: "up" },
+        { label: "袜业收入", val: "+20%+", trend: "up" },
+        { label: "Q1收入", val: "20.32亿", trend: "down" },
+        { label: "Q1净利", val: "明显增长", trend: "up" },
+        { label: "算力", val: "毛利提升", trend: "up" },
+        { label: "行业", val: "筑底回升", trend: "up" }
+      ],
+      tags: ["扭亏为盈","纱线毛利+2pct","袜业+20%","算力突破"],
+      focus: "①主动压降前端棉花供应链业务+会计口径调整（总额法→净额法）导致收入-25.2%；②纱线主业扭亏为盈，毛利率+2pct+；③袜业收入+20%+稳健增长；④算力业务毛利率明显提升，营收高增长；⑤一季度行业棉价回暖带动下游补库意愿增强，接单明显好转；⑥展望盈利韧性+成长空间有望进一步打开",
+      highlights: "收入80.5亿（-25.2%，主动压降棉花供应链+会计口径调整，不影响实际盈利）。纱线主业扭亏为盈，毛利率+2pct+。袜业+20%+。算力业务毛利率明显提升。Q1收入20.32亿（略有下降），归母净利明显增长。",
+      guidance: "①纺织主业稳健发展+网链产业增效+算力业务突破；②行业持续复苏和结构性优化下，盈利韧性有望提升；③对二季度及全年充满信心",
+      extra: "网链产业稳步开拓（传统棉花供应链+种业布局）。纱线Q1有去年去库基数影响，实际保持稳定。"
+    }]
+  },
+  // ───── 纺织（新增） ─────
+  {
+    id: "jinling-sports", name: "金陵体育", code: "300651.SZ", sector: "纺服", sub: "体育器材+赛事运营",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度网上业绩说明会",
+      metrics: [
+        { label: "2025利润", val: "翻倍增长", trend: "up" },
+        { label: "分红比例", val: "46.41%", trend: "up" },
+        { label: "赛事运营", val: "翻倍爆发", trend: "up" },
+        { label: "合计派息", val: "2824万", trend: "up" },
+        { label: "国际篮联认证", val: "官方认证", trend: "up" },
+        { label: "毛利率", val: "持续提升", trend: "up" },
+        { label: "现金流", val: "大幅改善", trend: "up" }
+      ],
+      tags: ["利润翻倍","赛事运营","FIBA认证","现金流改善"],
+      focus: "①2025利润翻倍增长，赛事服务稳健发展+投资收益贡献；②合计派息2824万，占净利46.41%；③毛利率持续提升，产品结构优化+供应链集采+工艺改良；④赛事运营业务从阶段性爆发转向常态化稳健经营；⑤现金流大幅改善，经营回款质量提升",
+      highlights: "利润翻倍增长。FIBA官方认证+行业标准起草单位。毛利率持续提升（每提升1pct有效增厚利润）。赛事运营业务翻倍爆发。现金流大幅改善。2026拓展经销商渠道下沉至三四线城市。",
+      guidance: "①巩固传统体育器材主业+研发高毛利新品；②积极提高体育消费业务占比；③赛事运营业务转向常态化稳健经营；④销售渠道下沉+电商渠道拓展；⑤精细化管控生产损耗/物流/管理费用",
+      extra: "国内较早获得国际篮联官方认证企业，多项国家及行业标准主要起草单位。2025依托全运会等大型赛事红利，赛事运营收入大幅回暖。"
+    }]
+  },
+  // ───── 食品饮料（业绩会新增） ─────
+  {
+    id: "guangming-dairy", name: "光明乳业", code: "600597.SH", sector: "食品饮料", sub: "低温乳品龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年年度业绩说明会",
+      metrics: [
+        { label: "2025业绩", val: "亏损", trend: "down" },
+        { label: "亏损原因", val: "新莱特生产问题", trend: "down" },
+        { label: "新莱特问题", val: "已基本解决", trend: "neutral" },
+        { label: "小西牛收购", val: "40%股份", trend: "up" },
+        { label: "渠道拓展", val: "量贩/折扣", trend: "up" },
+        { label: "品牌代言", val: "吴磊/优倍", trend: "up" },
+        { label: "供应链", val: "全流程数字化", trend: "up" },
+        { label: "回购计划", val: "暂无", trend: "neutral" },
+        { label: "26年举措", val: "六大方向", trend: "up" }
+      ],
+      tags: ["新莱特出清","渠道数字化","小西牛收购","品牌焕新"],
+      focus: "新莱特新西兰生产基地生产问题造成存货报废与生产成本增加，导致2025年亏损，目前问题已基本解决。公司围绕科技创新、牧场精益管理、全产业链降本、品牌焕新、全域渠道、优化投资管理六大方向推进2026年战略。",
+      highlights: "线上光明随心订数字化升级（从卖产品向卖服务跨越）+线下商超便利店深耕+ToB餐饮特通+社区链家公益+折扣零食量贩快速布局。牧场到餐桌全流程数字化可视化。完成收购小西牛40%股份。吴磊代言光明优倍，推出5.0超鲜牛乳/如实高蛋白/优加有机/莫斯利安低GI新品。",
+      guidance: "2026年六大举措：①科技创新引领加速产业化；②牧场精益管理绿色养殖；③全产业链降本攻坚战；④品牌焕新跨界联动；⑤全域渠道生态拓展；⑥优化投资管理国内外协同。暂无回购计划。",
+      extra: "乳制品行业竞争加剧，公司通过全产业链数字化和新品矩阵优化应对市场挑战，新西兰基地问题逐步出清后有望迎来业绩修复。"
+    }]
+  },
+  {
+    id: "shuanghui", name: "双汇发展", code: "000895.SZ", sector: "食品饮料", sub: "肉制品加工龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "Q1生鲜猪肉外销", val: "39.9万吨", trend: "up" },
+        { label: "生鲜猪肉同比", val: "+15.7%", trend: "up" },
+        { label: "新兴渠道增长", val: "+53.6%", trend: "up" },
+        { label: "吨均利润", val: "略降", trend: "down" }
+      ],
+      tags: ["猪肉外销高增","渠道扩张","吨利略降"],
+      focus: "Q1生鲜猪肉外销39.9万吨（+15.7%），新兴渠道+53.6%；吨均利润略降。",
+      highlights: "新兴渠道扩张迅速（+53.6%），生鲜猪肉外销量稳步提升。",
+      guidance: "持续推动屠宰产能整合优化与渠道下沉策略，通过规模化效应提升吨均利润。",
+      extra: "肉制品龙头在生猪周期波动中通过渠道多元化和产品结构优化保持韧性。"
+    }]
+  },
+  {
+    id: "cofic-tec", name: "中粮科技", code: "000930.SZ", sector: "食品饮料", sub: "生物发酵/可降解材料",
+    records: [{
+      date: "2026-05", type: "策略会", title: "新品投产进展交流",
+      metrics: [
+        { label: "阿洛酮糖试产", val: "5月", trend: "up" },
+        { label: "丙交酯试车", val: "6月", trend: "up" },
+        { label: "茶饮糖浆市占", val: "40%+", trend: "up" }
+      ],
+      tags: ["阿洛酮糖","丙交酯","生物新材料","可降解"],
+      focus: "阿洛酮糖5月试产、丙交酯6月试车，生物新材料和可降解塑料布局持续推进。",
+      highlights: "两大新品陆续进入试产试车阶段，茶饮糖浆市占率超40%巩固细分龙头。",
+      guidance: "新品投产后贡献增量收入，生物新材料和可降解塑料符合绿色低碳趋势。",
+      extra: "中粮集团旗下生物科技企业，依托集团资源在生物发酵领域持续拓展。"
+    }]
+  },
+  {
+    id: "qianwei-yangchu", name: "千味央厨", code: "001215.SZ", sector: "食品饮料", sub: "餐饮供应链",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "18.99亿", trend: "up" },
+        { label: "营收增速", val: "+1.64%", trend: "up" },
+        { label: "26Q1营收", val: "5.83亿", trend: "up" },
+        { label: "Q1营收增速", val: "+23.83%", trend: "up" }
+      ],
+      tags: ["Q1提速","餐饮供应链","海外建厂"],
+      focus: "2025营收18.99亿（+1.64%），26Q1营收5.83亿（+23.83%），增速显著回升。马来西亚建厂推进中。",
+      highlights: "26Q1营收增速大幅反弹至23.83%，餐饮需求回暖带动订单高增长。",
+      guidance: "马来西亚建厂拓展东南亚市场，提升海外供应链能力。",
+      extra: "B端速冻食品龙头，受益于餐饮连锁化和外卖渗透率提升。"
+    }]
+  },
+  {
+    id: "yuehai-feed", name: "粤海饲料", code: "001313.SZ", sector: "农业", sub: "水产饲料",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1销量", val: "18.9万吨", trend: "up" },
+        { label: "销量增速", val: "+61%", trend: "up" },
+        { label: "3月销量", val: "同比+83%", trend: "up" },
+        { label: "虾蟹料", val: "3月+110%", trend: "up" },
+        { label: "越南Q1", val: "+120%", trend: "up" },
+        { label: "年度目标", val: "130万吨", trend: "up" },
+        { label: "越南产能", val: "规划20万吨/一期10万吨", trend: "up" },
+        { label: "特水料占比", val: "70%+", trend: "up" },
+        { label: "应收账款", val: "管控向好", trend: "up" },
+        { label: "技术目标", val: "生长再+10%/料比再-10%", trend: "up" }
+      ],
+      tags: ["Q1+61%","越南出海首站","特水料龙头","三高三低","应收账款管控","触底反弹"],
+      focus: "①26Q1销量18.9万吨(+61%)，3月+83%(虾蟹料+110%，特水鱼料+，普水料+70%+)；②年度目标130万吨，年初开门红奠定达成基础；③越南2025年10月投产(规划20万吨/一期10万吨)，26Q1+120%，虾料/生鱼料/七星刀鱼料/罗非料/草鱼料销售网络建立，海水鱼料/金鲳鱼料国内优势产品输出；④特水料占比70%+，2026年水产料触底反弹年；⑤暖冬+存塘量多→用料需求旺盛；⑥应收账款管控突破：2025年末余额同比下降(四有客户评估+数据知识产权证书)",
+      highlights: "内部驱动力：品质认可+新客户开发+特水料增长动能充足+三高三低技术战略(高质量/高健康/高生长/低蛋白/低损耗/低料比)+四重保障质量体系。外部驱动力：暖冬效应+存塘多。越南桥头堡使命：试验田+可复制海外拓展模式，以越南辐射东南亚(泰/印/马)，新建/并购/合作推进全球化。新目标：生长速度再+10%、饲料系数再-10%、损耗再-50%。鱼粉高价应对：精准营养设计+集中采购锁价+灵活采购模式+数字化供应链+高附加值产品聚焦。",
+      guidance: "①全年130万吨销量战略目标；②越南2-3年达产，辐射东南亚；③特水料增量动能充足(金鲳鱼/加州鲈/海鲈鱼/生鱼投苗增加)；④原料高价应对：精准营养+集中采购+灵活采购+数字化供应链；⑤四有客户评估(有资金/有技术/有规模/有信誉)+财务业务双线授信严控赊销；⑥粤海阳光行主题营销激发团队开拓；⑦加大管理团队激励",
+      extra: "自主研发客户信用风险评估数据产品获全国水产饲料领域首张数据知识产权登记证书。部分区域增长超100%，个别近200%。"
+    }]
+  },
+  {
+    id: "sanquan", name: "三全食品", code: "002216.SZ", sector: "食品饮料", sub: "速冻食品",
+    records: [{
+      date: "2026-04", type: "策略会", title: "渠道合作与战略交流",
+      metrics: [
+        { label: "合作渠道", val: "山姆/盒马/奥乐齐", trend: "up" },
+        { label: "锅圈关联交易", val: "6000万", trend: "up" }
+      ],
+      tags: ["定制化","新零售渠道","速冻龙头"],
+      focus: "定制化合作山姆/盒马/奥乐齐等新零售渠道，与锅圈关联交易6000万。",
+      highlights: "深度绑定头部零售渠道，定制化产品策略成效显著。",
+      guidance: "持续深化头部零售和新餐饮渠道定制化合作。",
+      extra: "速冻食品存量竞争阶段，三全通过渠道定制化和品类创新维持优势。"
+    }]
+  },
+  {
+    id: "sunner", name: "圣农发展", code: "002299.SZ", sector: "食品饮料", sub: "鸡肉全产业链",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1净利", val: "2.53亿", trend: "up" },
+        { label: "净利增速", val: "+71.41%", trend: "up" },
+        { label: "圣泽903", val: "自研品种", trend: "up" },
+        { label: "食品销量", val: "45万吨", trend: "up" },
+        { label: "深加工产能", val: "50万吨+", trend: "up" }
+      ],
+      tags: ["利润高增","圣泽903","全产业链"],
+      focus: "26Q1净利2.53亿（+71.41%），自研圣泽903白羽肉鸡品种发挥作用，食品销量45万吨，深加工产能50万吨+。",
+      highlights: "利润高增71.41%，圣泽903打破海外垄断，全产业链一体化优势凸显。",
+      guidance: "全产业链布局深化，食品深加工产能利用率提升带动盈利能力改善。",
+      extra: "白羽肉鸡国产种源替代加速，圣农全产业链龙头地位稳固。"
+    }]
+  },
+  {
+    id: "haid", name: "海大集团", code: "002311.SZ", sector: "农业", sub: "饲料/动保/种苗",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩交流",
+      metrics: [
+        { label: "2025饲料销量", val: "3208万吨(+21%)", trend: "up" },
+        { label: "外销量", val: "2986万吨", trend: "up" },
+        { label: "26Q1营收", val: "290.1亿(+13.19%)", trend: "up" },
+        { label: "26Q1归母", val: "8.87亿", trend: "up" },
+        { label: "禽料外销", val: "1470万吨(+16%)", trend: "up" },
+        { label: "猪料外销", val: "770万吨(+37%)", trend: "up" },
+        { label: "水产料外销", val: "696万吨(+19%)", trend: "up" },
+        { label: "反刍料外销", val: "50万吨", trend: "neutral" },
+        { label: "生猪养殖利润", val: "↓9亿+", trend: "down" },
+        { label: "仔猪外购占比", val: "40%+", trend: "neutral" },
+        { label: "对虾养殖", val: "盈利线上方", trend: "up" },
+        { label: "2030目标", val: "5150万吨", trend: "up" },
+        { label: "分红", val: "10派11元/~18.1亿", trend: "up" },
+        { label: "中期分红", val: "2026中期方案", trend: "up" },
+        { label: "资本开支", val: "海外建设重点", trend: "up" }
+      ],
+      tags: ["饲料3208万吨","四轮驱动","管理架构改革","2030目标5150万","分红18亿","对虾盈利"],
+      focus: "①2025饲料销量3208万吨(+21%)，外销2986万吨(增量大幅超目标)；②禽料1470万吨(+16%)/猪料770万吨(+37%)/水产料696万吨(+19%)/反刍50万吨；③26Q1营收290.1亿(+13.19%)，归母8.87亿；④生猪养殖利润同比下降9亿+，40%+仔猪外购抬升成本但当前仔猪价格下降利好降本；⑤对虾养殖在盈利线上方，工厂化对虾成本可控具错位竞争优势；⑥行业竞争从产品单维转向种苗/动保/饲料/养殖技术服务多维综合竞争",
+      highlights: "四轮驱动(饲料+种苗+动保+供应链)成熟模式。管理架构改革专业化元年：集团层面搭建专业化产品事业部。行业竞争高质量发展突围，缺乏核心竞争力企业压力加大。对虾养殖通过工厂化科学设计+循环水系统+生物饵料技术+严格生物防控实现成本可控。资本开支聚焦海外产能建设+国内设备升级改造。",
+      guidance: "①2030年5150万吨战略目标；②稳步提升国内产能利用率和市场份额；③加快海外饲料业务拓展；④聚焦生猪团队能力建设和轻资产模式创新；⑤母教乳浓前端猪料技术引领变革；⑥10派11元+2026中期分红方案，灵活利用回购/分红回馈投资者；⑦资本开支海外建设+国内设备升级",
+      extra: "饲料产业竞争从产品单维转向种苗/动保/饲料/养殖技术服务多维度综合竞争。"
+    }]
+  },
+  {
+    id: "dbn", name: "大北农", code: "002385.SZ", sector: "农业", sub: "饲料/种业",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩交流",
+      metrics: [
+        { label: "2025营收", val: "291.19亿(+1.22%)", trend: "up" },
+        { label: "2025归母", val: "-6.42亿", trend: "down" },
+        { label: "减值影响归母", val: "-7.63亿", trend: "down" },
+        { label: "26Q1营收", val: "71.91亿(+4.7%)", trend: "up" },
+        { label: "26Q1归母", val: "-1.75亿", trend: "down" },
+        { label: "饲料外销", val: "555万吨(+2.74%)", trend: "up" },
+        { label: "猪料外销", val: "446.7万吨(+4.47%)", trend: "up" },
+        { label: "26Q1饲料外销", val: "145万吨(+14%)", trend: "up" },
+        { label: "种业收入", val: "15.28亿(+7.24%)", trend: "up" },
+        { label: "玉米种子", val: "3500万kg", trend: "neutral" },
+        { label: "水稻种子", val: "2500万kg(+60%)", trend: "up" },
+        { label: "26Q1种业", val: "2100万kg(+7.3%)", trend: "up" },
+        { label: "转基因审定", val: "95/160(59%)", trend: "up" },
+        { label: "欧盟", val: "DBN9004获批", trend: "up" },
+        { label: "生猪出栏", val: "445.96万头", trend: "up" },
+        { label: "3月成本", val: "~12元/kg", trend: "up" },
+        { label: "公司+生态农场", val: "83%", trend: "up" },
+        { label: "饲料创利", val: "2025超4亿/26Q1近1.5亿", trend: "up" },
+        { label: "种业净利", val: "2.6亿+/+70%", trend: "up" },
+        { label: "2026资本开支", val: "无大规模", trend: "neutral" }
+      ],
+      tags: ["减值8.67亿","转基因龙头","欧盟DBN9004","水稻+60%","公司+生态农场83%","2026无大规模开支"],
+      focus: "①2025营收291.19亿(+1.22%)，归母-6.42亿(减值8.67亿/归7.63亿：长投减值3.84亿+生物资产2.45亿+商誉0.88亿)；②26Q1营收71.91亿(+4.7%)，归母-1.75亿(猪价走低)；③饲料外销555万吨(+2.74%)，26Q1外销145万吨(+14%)其中猪料+16.9%/反刍+18.9%/水产+32.5%；④种业收入15.28亿(+7.24%)，归母1.8亿(+90%+)，26Q1销售2100万kg(+7.3%)水稻+29.8%/+19%；⑤转基因审定95/160个(59%)行业第一；⑥欧盟DBN9004获批打通全球生物技术闭环；⑦生猪出栏445.96万头，3月成本12元/kg",
+      highlights: "种业强势增长：玉米+水稻+大豆三大作物全生态区布局。水稻2500万kg(+60%)/+26%。转基因审定品种数及除草剂登记数目均行业第一。南美布局：大豆性状获批巴西/阿根廷/乌拉圭，2026年完成筛选后商业化推广。饲料板块创利超4亿(原料价格下降致量增价减)。26Q1饲料创利近1.5亿(量增)。代养费行业相对较高(250元/头+)，不让养殖户承担猪价风险。新任董事长莫博士强化科技优势聚焦作物科技+畜牧科技。",
+      guidance: "①2026年生物育种推广面积占60%+；②南美大豆进入品种登记→商业化推广；③转基因玉米审定95个(59%市占)；④饲料保持毛利率稳定提升母子料比例；⑤水产料专注特水料；⑥反刍料肉牛低迷但相对稳定；⑦2026无大规模资本开支(饲料技改+种业智慧育种)；⑧降低费用提质增效；⑨生物育种资产独立运营待公告",
+      extra: "丰脉农场示范模式影响扩大。商誉账面6.4亿。应收账款授信适度从严管控，坏账风险可控。"
+    }]
+  },
+  {
+    id: "br", name: "百润股份", code: "002568.SZ", sector: "食品饮料", sub: "预调酒龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1增长", val: "恢复增长", trend: "up" },
+        { label: "威士忌", val: "铺市推进", trend: "up" },
+        { label: "渠道数字化", val: "成效显著", trend: "up" }
+      ],
+      tags: ["预调酒","威士忌","渠道数字化","强爽"],
+      focus: "26Q1恢复增长，预调酒龙头稳固，威士忌铺市推进，渠道数字化试点成效显著，强爽持续放量。",
+      highlights: "强爽持续放量带动增长恢复，威士忌新品铺市打开第二成长空间。",
+      guidance: "威士忌铺市和渠道数字化持续建设，提供中长期增长新动能。",
+      extra: "预调酒渗透率仍低，RIO占绝对领先份额。"
+    }]
+  },
+  {
+    id: "haoxiangni", name: "好想你", code: "002582.SZ", sector: "食品饮料", sub: "红枣龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "13.28亿", trend: "neutral" },
+        { label: "2025归母", val: "8.66亿", trend: "up" },
+        { label: "26Q1营收", val: "5.05亿", trend: "up" },
+        { label: "26Q1扣非", val: "+17%", trend: "up" }
+      ],
+      tags: ["红枣龙头","山姆渠道","量贩渠道"],
+      focus: "2025营收13.28亿，归母8.66亿（含投资收益），26Q1营收5.05亿，扣非+17%。山姆和量贩渠道持续拓展。",
+      highlights: "归母净利8.66亿含投资收益贡献，26Q1扣非增长17%。",
+      guidance: "推进山姆/量贩等高增长渠道布局，深化品类创新。",
+      extra: "红枣行业龙头，通过渠道多元化和产品创新驱动增长。"
+    }]
+  },
+  {
+    id: "yanjin", name: "盐津铺子", code: "002847.SZ", sector: "食品饮料", sub: "休闲零食",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1营收", val: "15.83亿", trend: "up" },
+        { label: "营收增速", val: "+2.94%", trend: "up" },
+        { label: "归母增速", val: "+29.48%", trend: "up" },
+        { label: "线下增速", val: "+20%", trend: "up" },
+        { label: "电商", val: "-50%", trend: "down" }
+      ],
+      tags: ["归母高增","线下回暖","电商收缩","零食量贩"],
+      focus: "26Q1营收15.83亿（+2.94%），归母+29.48%；线下+20%，电商-50%；定量流通和零食量贩受益明显。",
+      highlights: "归母高增29.48%盈利改善显著，线下恢复20%增长，零食量贩渠道受益。电商主动收缩调整。",
+      guidance: "聚焦定量流通和零食量贩渠道，优化电商结构提升盈利能力。",
+      extra: "积极拥抱零食量贩红利，电商结构调整短期影响收入但有利于利润改善。"
+    }]
+  },
+  {
+    id: "seamild", name: "西麦食品", code: "002956.SZ", sector: "食品饮料", sub: "燕麦食品",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1营收", val: "8.24亿", trend: "up" },
+        { label: "营收增速", val: "+25.65%", trend: "up" },
+        { label: "归母增速", val: "+85.86%", trend: "up" }
+      ],
+      tags: ["利润高增","药食同源","零食量贩翻倍"],
+      focus: "26Q1营收8.24亿（+25.65%），归母+85.86%。药食同源布局推进，零食量贩翻倍增长。",
+      highlights: "归母大增85.86%，零食量贩翻倍增长。",
+      guidance: "深化药食同源健康食品布局，把握零食量贩红利。",
+      extra: "国产燕麦龙头，药食同源和零食量贩成为新增长引擎。"
+    }]
+  },
+  {
+    id: "kinghealth", name: "金河生物", code: "002688.SZ", sector: "农业", sub: "动保/健康品",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "28.78亿(+21.41%)", trend: "up" },
+        { label: "2025归母", val: "0.28亿(剔除减值1.77亿/+31.55%)", trend: "up" },
+        { label: "26Q1营收", val: "7.42亿(+18.67%)", trend: "up" },
+        { label: "26Q1归母", val: "0.62亿(+21.87%)", trend: "up" },
+        { label: "金霉素产能", val: "11.5万吨", trend: "up" },
+        { label: "金霉素外销", val: "60-70%(2/3美国)", trend: "neutral" },
+        { label: "国内外提价", val: "保利润", trend: "up" },
+        { label: "外销毛利率", val: ">内销", trend: "up" },
+        { label: "虾青素", val: "3000吨/年/满产3亿", trend: "up" },
+        { label: "虾青素毛利率", val: "~40-50%", trend: "up" },
+        { label: "辅酶Q10", val: "2万吨柔性产线", trend: "up" },
+        { label: "疫苗", val: "17上市/20+在研", trend: "up" },
+        { label: "牛羊市场空间", val: "4-5万吨", trend: "up" },
+        { label: "宠物", val: "艾宠易APP上线", trend: "up" }
+      ],
+      tags: ["量价齐升","六期投产","虾青素上市","合成生物学","疫苗17个","宠物双品双线","辅酶Q10"],
+      focus: "①2025营收28.78亿(+21.41%)，归母0.28亿(剔除商誉减值1.77亿/+31.55%)；②26Q1营收7.42亿(+18.67%)，归母0.62亿(+21.87%)；③金霉素11.5万吨(六期Q2满产)，60-70%外销(2/3美国)，国内外提价保利润；④虾青素3000吨/年(合成生物学)，满产3亿收入，毛利率40-50%，2025上市销售；⑤疫苗17个上市+20+在研，佑蓝宝增长+布病疫苗收入大增毛利率大幅提升；⑥辅酶Q10中间体2万吨柔性产线；⑦宠物：艾宠易APP上线，双品双线模式(进口国产+线上线下)",
+      highlights: "化药板块量价齐升：六期投产产能翻倍，原材料(玉米/煤炭)下降+节能降耗+提价→成本继续回落毛利率提升。外销毛利率高于内销(尤其美国)。反刍场景增加(绵羊羔羊获批)+水产/兔申报→增量空间4-5万吨。虾青素合成生物学法产量高成本低，水产饲料领域竞争力强。疫苗板块猪用/反刍/宠物/诊断四赛道，猪用疫苗收入好于上年。",
+      guidance: "①虾青素2026年大力推广(3000吨/年/毛利率40-50%)；②辅酶Q10投产贡献新利润增长点；③疫苗持续推新优化收入结构；④金霉素国内外市场提价保利润；⑤反刍和宠物用药推出优化综合实力；⑥合成生物学技术应用拓展新产品；⑦与上海交大战略合作布局合成生物",
+      extra: "兽用化药金霉素预混剂行业龙头。技术营销模式为养殖户制定用药方案。海外业务逐年增长有效抵御单一国内市场风险。"
+    }]
+  },
+  {
+    id: "zhongpet", name: "中宠股份", code: "002891.SZ", sector: "农业", sub: "宠物食品",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "55.21亿(+16.95%)", trend: "up" },
+        { label: "2025归母", val: "3.65亿(-7.28%)", trend: "down" },
+        { label: "26Q1营收", val: "15.33亿(+39.23%)", trend: "up" },
+        { label: "26Q1归母", val: "0.73亿(-19.80%)", trend: "down" },
+        { label: "零食", val: "33.81亿(+7.94%)", trend: "up" },
+        { label: "主粮", val: "15.53亿(+40.39%)", trend: "up" },
+        { label: "境外", val: "33.49亿(+9.77%)", trend: "up" },
+        { label: "境内", val: "18.72亿(+32.44%)", trend: "up" },
+        { label: "OEM", val: "28.75亿(+9.90%)", trend: "up" },
+        { label: "经销", val: "12.65亿(+5.92%)", trend: "up" },
+        { label: "直销", val: "10.81亿(+65.27%)", trend: "up" },
+        { label: "美国第二工厂", val: "Q2-Q3投产(审批延后)", trend: "up" },
+        { label: "研发中心", val: "12800平启用", trend: "up" },
+        { label: "汇率风险", val: "5000万衍生品额度", trend: "neutral" }
+      ],
+      tags: ["营收+17%","主粮+40%","境内+32%","直销+65%","三大品牌","美国第二工厂","全球研发中心"],
+      focus: "①2025营收55.21亿(+16.95%)，归母3.65亿(-7.28%费用投入加大)；②26Q1营收15.33亿(+39.23%)，归母0.73亿(-19.80%)；③零食33.81亿(+7.94%)/主粮15.53亿(+40.39%)/境外33.49亿(+9.77%)/境内18.72亿(+32.44%)；④OEM 28.75亿(+9.90%)/经销12.65亿(+5.92%)/直销10.81亿(+65.27%)；⑤三大核心品牌：顽皮(经典)/领先(高端)/ZEAL真致(新西兰)；⑥美国第二工厂审批延后Q2-Q3逐步落地；⑦全球研发创新服务中心(12800平)启用",
+      highlights: "国内业务增长强劲(+32.44%)，直销模式(+65.27%)体现电商渠道爆发。主粮高增(+40.39%)反映品类结构升级。领先猫粮连续三年复购第一/增速第一。顽皮品牌销往77个国家品牌壁垒初显。宠物经济突破3000亿(2026白皮书)，竞争从价格导向转向配方研发/原料升级/合规管理/全渠道综合实力。费用投入围绕品牌建设+研发+人才三大方向。",
+      guidance: "①五年战略：自主品牌为核心，聚焦国内，加速海外拓展；②美国第二工厂Q2-Q3投产支撑北美本土化产能；③三大核心品牌深化细分赛道；④全球研发中心强化研发体系；⑤合理加大资源投放抢占市场机遇；⑥汇率风险管理：5000万衍生品额度；⑦全球化人才梯队+激励性分配方案；⑧稳步推进全球产业链布局巩固代工规模",
+      extra: "五年战略规划：以自主品牌建设为核心聚焦国内市场。业务全球化布局广泛常态化开展外汇风险管理。国内外业务季节性波动：国内电商促销周期+海外OEM库存管理节奏。行业头部集中化趋势逐步显现。"
+    }]
+  },
+// ───── 农业（业绩会新增） ─────
+  {
+    id: "shennong", name: "神农集团", code: "605296.SH", sector: "农业", sub: "生猪养殖",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "53.52亿", trend: "neutral" },
+        { label: "2025归母", val: "3.39亿", trend: "up" },
+        { label: "2025经营现金流", val: "8.10亿", trend: "up" },
+        { label: "2025负债率", val: "29.53%", trend: "up" },
+        { label: "26Q1营收", val: "13.22亿", trend: "neutral" },
+        { label: "26Q1归母", val: "-6.48亿(含减值4.8亿)", trend: "down" },
+        { label: "Q1完全成本", val: "12.2元/kg", trend: "up" },
+        { label: "3月完全成本", val: "12.1元/kg", trend: "up" },
+        { label: "断奶成本", val: "260元/头", trend: "up" },
+        { label: "PSY", val: "30", trend: "up" },
+        { label: "料肉比", val: "2.49", trend: "up" },
+        { label: "全年成本目标", val: "11.5元/kg", trend: "up" },
+        { label: "PSY目标", val: "31", trend: "up" },
+        { label: "料肉比目标", val: "2.4", trend: "up" },
+        { label: "信用授信余额", val: "~25亿", trend: "up" },
+        { label: "Q1末负债率", val: "33.98%", trend: "neutral" }
+      ],
+      tags: ["减值计提","成本持续优化","PSY30","料肉比2.49","生物安全","饲料+养殖+屠宰+深加工"],
+      focus: "①2025营收53.52亿，归母3.39亿，经营现金流8.1亿，负债率29.53%；②26Q1归母-6.48亿含存货跌价4.8亿（3月底猪价底部，按准则计提），若按期货合约预估售价模拟仅减值1.24亿，猪价回暖可转回；③Q1完全成本12.2元/kg（3月12.1），断奶成本260元/头，PSY30，料肉比2.49；④全年目标成本11.5元/kg（锚定2025饲料原料成本），PSY31，料肉比2.4；⑤纯信用授信余额~25亿，融资渠道畅通；⑥口蹄疫风险可防可控，生产不受影响",
+      highlights: "成本持续优化，3月完全成本降至12.1元/kg行业领先。PSY达30、料肉比2.49效率突出。Q1大额减值4.8亿系会计政策按资产负债表日猪价计提，若按期货价格模拟仅1.24亿，减值可在猪价回暖时转回抵减未来成本。生物安全体系完善（母猪场加装空气过滤），种群持续对接PIC改良。饲料保自用，屠宰就近就地屠宰运肉替代运猪降本，深加工培育爬坡中。",
+      guidance: "①全年平均完全成本目标11.5元/公斤（锁价2025饲料原料+内部提效+满负荷+优化料肉比+压降费用）；②PSY目标31，料肉比向2.4靠拢；③对内缩小各猪场管理差异，对外引进PIC优良种猪；④屠宰板块拓宽渠道提升市占率，养殖集中区域新建屠宰场；⑤深加工板块逐年减亏至保本盈利，不盲目扩张；⑥信用授信25亿保障资金安全，与区域优质银行长期合作",
+      extra: "生物安全体系为核心竞争力（空气过滤系统+分区管理+洗消检测）。存货跌价在猪价修复时可转回优化未来毛利。深加工板块处于培育爬坡阶段。"
+    }]
+  },
+  {
+    id: "juxing", name: "巨星农牧", code: "603477.SH", sector: "农业", sub: "生猪/家禽养殖",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "80亿", trend: "up" },
+        { label: "营收增速", val: "+31.62%", trend: "up" },
+        { label: "2025归母", val: "0.3034亿", trend: "up" },
+        { label: "出栏量", val: "458万头", trend: "up" },
+        { label: "出栏增速", val: "+66%", trend: "up" },
+        { label: "26Q1营收", val: "19.26亿", trend: "up" },
+        { label: "Q1营收增速", val: "+17.04%", trend: "up" },
+        { label: "Q1归母", val: "-3.56亿", trend: "down" },
+        { label: "Q1出栏", val: "115.86万头", trend: "up" },
+        { label: "Q1成本", val: "6.35元/斤", trend: "up" },
+        { label: "PSY", val: "29+", trend: "up" },
+        { label: "育肥成活率", val: "~94%", trend: "up" },
+        { label: "育肥料肉比", val: "~2.5", trend: "up" },
+        { label: "全年成本目标", val: "~6.0元/斤", trend: "up" },
+        { label: "定增", val: "证监会已注册", trend: "up" }
+      ],
+      tags: ["出栏+66%","成本领先","五星养殖体系","定增获注册","公司+农户","ESG报告"],
+      focus: "①2025营收80亿(+31.62%)，归母3034万，出栏458万头(+66%)；②26Q1营收19.26亿(+17.04%)，归母-3.56亿（淘汰低效种猪处置加大+行业亏损），Q1出栏115.86万头；③Q1成本6.35元/斤（淘汰低效致成本偏高），全年目标~6.0元/斤；④PSY29+，育肥成活率~94%，育肥料肉比~2.5；⑤向特定对象发行股票获证监会注册批复（2026年4月），已备案通过；⑥坚定由规模扩张向效率致胜转型，六高六式策略",
+      highlights: "出栏量暴增66%至458万头，26Q1延续17%收入增长。成本持续优化，Q1因淘汰低效产能成本偏高但全年目标6.0元/斤。种猪育种体系整合全球资源，PSY29+接近行业最优，育肥成活率94%、料肉比2.5效率突出。已披露ESG报告，践行可持续发展。迭代升级紧密型公司+农户模式，联农带农。使命让健康美味滋养幸福生活，向全球信赖猪肉食品企业迈进。",
+      guidance: "①2026年完全成本目标~6.0元/斤（种场优势提升+育肥效率优化：降低料肉比+提高日增重+育肥存活率）；②战略核心成本领先，锚定全球标杆企业，淬炼极致效率；③五星养殖体系+数智化深度融合，突破关键生产指标；④能繁母猪数量位于产能合理区间；⑤聚焦生猪养殖主航道，洞察猪肉食品深加工趋势；⑥资产负债率控制在合理水平，核心风险防线（财务/生产/资产/品牌）；⑦定增资金到位支撑产能扩张",
+      extra: "坚守认真养猪一百年专注生猪产业链长期主义。连续穿越多轮猪周期成功验证。定增获证监会注册批复，已进入股份登记托管阶段。"
+    }]
+  },
+  // ───── 轻工（业绩会新增） ─────
+  {
+    id: "milan-belong", name: "梦百合", code: "603313.SH", sector: "轻工", sub: "记忆绵家居",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "64.74亿", trend: "down" },
+        { label: "营收增速", val: "-9.21%", trend: "down" },
+        { label: "综合毛利率", val: "26.03%", trend: "up" },
+        { label: "毛利率同比", val: "+0.78ppt", trend: "up" },
+        { label: "净利增速", val: "-32.3%", trend: "down" },
+        { label: "美国亏损", val: "1.39亿", trend: "down" },
+        { label: "经销零售收入", val: "26.03亿/+4.96%", trend: "up" },
+        { label: "境外收入", val: "1.01亿", trend: "down" },
+        { label: "智能坐便器", val: "销量+4.92%", trend: "up" },
+        { label: "26Q1毛利率", val: "29.86%", trend: "up" },
+        { label: "Q1毛利率同比", val: "+0.84ppt", trend: "up" }
+      ],
+      tags: ["经销零售+5%","店效倍增2.0","鸿蒙生态","美国电商亏损","里境品牌","智能马桶"],
+      focus: "①2025营收64.74亿(-9.21%)，综合毛利率26.03%(+0.78ppt)，净利-32.3%（费用率+0.77ppt）；②经销零售收入26.03亿(+4.96%)占比40.71%，电商/家装/工程渠道下降；③梦百合美国亏损1.39亿，但亚马逊保持头部位置；④智能坐便器销量+4.92%；⑤26Q1毛利率29.86%(+0.84ppt)，净利仍亏但增；⑥店效倍增2.0全面推行并向电商/家装复制",
+      highlights: "行业从增量转入存量竞争，毛利率逆势提升0.78ppt。经销零售成核心增长渠道+4.96%。店效倍增方法论向全渠道复制（线上转化率、评分显著提升）。智能马桶P50/D30系列+鸿蒙生态花洒/浴霸构建差异化智慧卫浴空间。里境双系列（HOME高端+VALUE下沉）持续推进。美国供给端出清加速（合规要求+海关查验），梦百合美国工厂成稀缺资源，3月起启动提价沟通。",
+      guidance: "①店效倍增2.0零售渠道全面推行，电商/家装渠道复制精细化运营；②旗舰产品操盘（P50/D30智能马桶+鸿蒙生态花洒浴霸）；③SKU聚焦核心品类和高价值产品；④美国电商保持规模向利润考核倾斜，海外电商向盈亏平衡冲刺；⑤国内优化长期亏损直营店，东南亚专卖店+经销商拓展，欧洲跨境电商切入；⑥与鸿蒙智选深度合作、央视《大国品牌》协同；⑦全年成本通过价格调整+工艺优化+价值链降本对冲原材料上涨",
+      extra: "IPD集成产品开发+IPMS集成产品营销体系保障上市即上量。美国电商战略意义在于提升美国工厂产能利用率和盈利能力，是必须打赢的硬仗。美国合规出清后梦百合制造优势成稀缺资源。与SSB(舒达席梦思)合作逐步深入。"
+    }]
+  },
+  {
+    id: "wuzhou", name: "五洲特纸", code: "605007.SH", sector: "轻工", sub: "特种纸",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩交流",
+      metrics: [
+        { label: "2025营收", val: "88.84亿", trend: "up" },
+        { label: "营收增速", val: "+16%", trend: "up" },
+        { label: "2025销量", val: "220万吨", trend: "up" },
+        { label: "26Q1毛利率", val: "9.5%", trend: "up" },
+        { label: "毛利率环比", val: "8.2%→9.5%", trend: "up" },
+        { label: "化学浆项目", val: "2027年4月出浆", trend: "up" },
+        { label: "格拉辛", val: "1.2万吨/月", trend: "up" },
+        { label: "九江码头", val: "配套中", trend: "up" },
+        { label: "60万吨化学浆", val: "2027年4月", trend: "up" }
+      ],
+      tags: ["毛利率改善","化学浆自给","格拉辛","行业出清"],
+      focus: "2025营收88.84亿（+16%），销量220万吨；26Q1毛利率9.5%（环比8.2%→9.5%）。60万吨化学浆2027年4月出浆，格拉辛1.2万吨/月，九江物流码头配套。文化纸/格拉辛提价，行业出清加速。",
+      highlights: "毛利率环比改善至9.5%，化学浆自给大幅提升竞争力，格拉辛产能释放，九江码头提升效率。",
+      guidance: "化学浆项目2027年投产提升浆纸一体化程度，行业出清加速格局改善。",
+      extra: "特种纸经历周期底部后出清加速，规模优势和产业链延伸领先受益。"
+    }]
+  },
+  {
+    id: "monalisa", name: "蒙娜丽莎", code: "002918.SZ", sector: "轻工", sub: "建筑陶瓷",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "地产影响", val: "承压", trend: "down" },
+        { label: "战略方向", val: "大瓷砖+新材料", trend: "neutral" }
+      ],
+      tags: ["地产承压","大瓷砖","先进陶瓷"],
+      focus: "房地产承压影响瓷砖需求，推进大瓷砖战略和先进陶瓷新材料布局。",
+      highlights: "大瓷砖战略提升附加值，先进陶瓷新材料打开增长空间。",
+      guidance: "地产下行周期通过产品结构升级和新材料转型突破。",
+      extra: "瓷砖行业与地产周期高度相关，龙头积极布局新材料转型。"
+    }]
+  },
+  {
+    id: "arrow-home", name: "箭牌家居", code: "001322.SZ", sector: "轻工", sub: "卫浴龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "64.74亿", trend: "down" },
+        { label: "营收增速", val: "-9.21%", trend: "down" },
+        { label: "综合毛利率", val: "26.03%", trend: "up" },
+        { label: "毛利率同比", val: "+0.78ppt", trend: "up" },
+        { label: "净利增速", val: "-32.3%", trend: "down" },
+        { label: "26Q1营收", val: "9.78亿", trend: "down" },
+        { label: "Q1营收增速", val: "-6.86%", trend: "down" },
+        { label: "Q1毛利率", val: "29.86%", trend: "up" },
+        { label: "Q1毛利率同比", val: "+0.84ppt", trend: "up" },
+        { label: "经销零售", val: "26.03亿/+4.96%", trend: "up" },
+        { label: "零售占比", val: "40.71%", trend: "up" },
+        { label: "智能马桶", val: "销量+4.92%", trend: "up" },
+        { label: "境外收入", val: "1.01亿", trend: "down" },
+        { label: "鸿蒙生态", val: "花洒/浴霸", trend: "up" },
+        { label: "旗舰产品", val: "P50/D30系列", trend: "up" }
+      ],
+      tags: ["经销零售+5%","店效倍增2.0","鸿蒙智联","P50/D30智能马桶","里境双品牌","IPD+IPMS体系","SKU聚焦"],
+      focus: "①2025营收64.74亿(-9.21%)，综合毛利率26.03%(+0.78ppt)，净利-32.3%(费用率+0.77ppt)；②经销零售26.03亿(+4.96%)占比40.71%，电商/家装/工程渠道下降但优化中；③境外收入1.01亿(1.58%)，北美下降但东南亚初步进展；④智能马桶销量+4.92%（均价拖累收入略降）；⑤26Q1毛利率29.86%(+0.84ppt)，净利亏损但增；⑥店效倍增2.0全面推行并向电商/家装复制，3月好转",
+      highlights: "地产下行中毛利率逆势提升0.78ppt，成本管控有效。店效倍增2.0零售渠道全面推行，成功经验复制电商/家装（转化率、评分显著提升）。鸿蒙智联生态合作从单品到空间构建智慧卫浴体验，鸿蒙花洒/浴霸为增量。旗舰产品操盘（P50/D30系列泡泡自洁智能马桶）全生命周期管理（IPD+IPMS体系）。里境双系列：HOME高端+VALUE下沉。与央视《大国品牌》战略合作。SKU聚焦核心品类和高价值产品。海外：东南亚专卖店+经销商本土化，欧洲跨境电商切入。",
+      guidance: "①店效倍增2.0深化，复制至电商/家装等全渠道；②旗舰产品操盘保障上市即上量；③SKU聚焦持续优化产品结构；④鸿蒙生态产品从单品到空间差异化；⑤海外东南亚线下深耕+欧洲跨境电商探索；⑥原材料上涨通过分阶段调价+工艺优化+价值链降本对冲；⑦26年核心目标提升盈利能力；⑧优化长期亏损直营店，资源向有效门店集中",
+      extra: "行业从增量扩张转入存量竞争，智能化为增长引擎。总部以赋能巡检（非简单驻店）传递方法论，滚动培训确保效果持续。帮助经销商构建自我造血能力。"
+    }]
+  },
+  {
+    id: "zhejiang-qiang", name: "浙江永强", code: "002489.SZ", sector: "轻工", sub: "户外家具ODM",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "印尼工厂", val: "下半年投产", trend: "up" },
+        { label: "汇率策略", val: "中性原则", trend: "neutral" },
+        { label: "越南扩产", val: "推进中", trend: "up" }
+      ],
+      tags: ["印尼工厂","越南扩产","出口导向"],
+      focus: "印尼工厂下半年投产，汇率中性原则，越南持续扩产。",
+      highlights: "多国产能布局分散贸易风险。",
+      guidance: "海外产能扩张支撑订单交付能力。",
+      extra: "全球户外家具ODM龙头，全球化产能应对贸易不确定性。"
+    }]
+  },
+  // ───── 酒店旅游（业绩会新增） ─────
+  {
+    id: "hongqi", name: "红旗连锁", code: "002697.SZ", sector: "酒店旅游", sub: "便利店连锁",
+    records: [{
+      date: "2026-04", type: "策略会", title: "渠道拓展战略交流",
+      metrics: [
+        { label: "红旗优选SKU", val: "100个", trend: "up" },
+        { label: "门店类型", val: "24小时门店", trend: "up" }
+      ],
+      tags: ["区域密集","川外拓展","自有品牌"],
+      focus: "川外拓展推进，24小时门店模式成熟，红旗优选SKU达100个。",
+      highlights: "四川区域密集布局形成规模壁垒，自有品牌SKU持续丰富。",
+      guidance: "拓展川外市场，深化区域密集布局。",
+      extra: "便利店行业区域密集布局典范。"
+    }]
+  },
+  // ───── 酒店旅游（新增） ─────
+  {
+    id: "sanxia-tourism", name: "三峡旅游", code: "002627.SZ", sector: "酒店旅游", sub: "长江游轮旅游+客运",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026年4月28日投资者关系活动记录表",
+      metrics: [
+        { label: "2025营收", val: "7.57亿(+2.1%)", trend: "neutral" },
+        { label: "2025净利", val: "6393万(-46%)", trend: "down" },
+        { label: "26Q1净利", val: "-25.6%", trend: "down" },
+        { label: "累计分红", val: "5.08亿", trend: "up" },
+        { label: "分红比例", val: "50%+", trend: "up" },
+        { label: "客单价", val: "稳步提升", trend: "up" },
+        { label: "省际游轮", val: "首批2艘筹备", trend: "neutral" },
+        { label: "境外客占比", val: "9.79%", trend: "up" }
+      ],
+      tags: ["省际游轮","巅峰双峡","高分红","产品升级"],
+      focus: "①2025净利下滑46%（子公司补缴税款5494万+九凤谷景区资产减值）；②26Q1净利-26%（省际游轮筹备期费用+公交补贴减少+利息下降）；③观光游轮客单价提升（产品结构优化，高端VIP产品占比提升）；④省际度假游轮首批两艘筹备中（智能家居/船岸一体/沉浸式体验）；⑤巅峰双峡项目推进中（持股40%）；⑥累计现金分红5.08亿，分红比例50%+",
+      highlights: "观光游轮收入增速高于游客量增速（客单价提升）。省际游轮五大特色（硬件先进/服务极致/体验独特/行程舒适/风光全揽）。境外客占比9.79%高于同级。拟注销1892万股回购股份增厚股东权益。超额利润分享激励机制。",
+      guidance: "①省际度假游轮尽快投入运营；②深化产品创新迭代，优化航线与产品矩阵；③'一价全包'模式淡化二次消费；④外延式拓展跻身省际豪华游轮头部方阵；⑤保持分红政策连续性与稳定性",
+      extra: "2025长江三峡省际游轮接待108.34万人（90.21%国内），境外11.76万人（9.79%）。客群偏年轻化（45岁以下占24.5%）。四川/浙江/江苏/上海/广东为前五大客源地。"
+    }]
+  },
+  // ───── 餐饮（业绩会新增） ─────
+  {
+    id: "babi", name: "巴比食品", code: "605338.SH", sector: "餐饮", sub: "中式面点连锁",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报暨2026Q1业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "18.59亿", trend: "up" },
+        { label: "营收增速", val: "+11.2%", trend: "up" },
+        { label: "2025归母", val: "2.73亿", trend: "down" },
+        { label: "2025扣非", val: "2.45亿", trend: "up" },
+        { label: "扣非增速", val: "+16.7%", trend: "up" },
+        { label: "26Q1营收", val: "3.8亿", trend: "up" },
+        { label: "Q1营收增速", val: "+2.8%", trend: "up" },
+        { label: "26Q1净利", val: "4721万", trend: "up" },
+        { label: "Q1净利增速", val: "+26.9%", trend: "up" },
+        { label: "门店数", val: "5871家", trend: "neutral" },
+        { label: "小笼包店", val: "116家", trend: "up" },
+        { label: "26年开店", val: "600-700家", trend: "up" },
+        { label: "客单价", val: "10-15元", trend: "neutral" },
+        { label: "大客户零售", val: "4.32亿", trend: "up" },
+        { label: "大客户增速", val: "+13.5%", trend: "up" },
+        { label: "毛利率", val: "28.5%", trend: "up" },
+        { label: "毛利率同比", val: "+1.8pct", trend: "up" }
+      ],
+      tags: ["利润高增","门店扩张","毛利率改善","小笼包店型"],
+      focus: "2025营收18.59亿（+11.2%），归母2.73亿（-1.3%），扣非2.45亿（+16.7%）。26Q1营收3.8亿（+2.8%），净利4721万（+26.9%）。门店5909→5871家（质量优化），手工小笼包店型116家。26年开店保底600冲刺700。老店升级营业额翻倍，客单价10-15元。大客户零售4.32亿（+13.5%）。毛利率28.5%（+1.8pct）。30%新开店+70%老店升级。",
+      highlights: "扣非+16.7%，26Q1净利+26.9%，毛利率+1.8pct至28.5%。手工小笼包店型快速复制至116家，老店升级营业额翻倍。开店目标保底600冲刺700。",
+      guidance: "26年开店保底600冲刺700，老店升级营业额翻倍。青露品牌并表增厚收入。股东回报预期稳定。",
+      extra: "中式面点连锁龙头，客单价10-15元定位大众消费，高频刚需抗周期。"
+    }]
+  },
+  // ───── 食品饮料（酒类业绩会新增） ─────
+  {
+    id: "jinhui-liquor", name: "金徽酒", code: "603919.SH", sector: "食品饮料", sub: "白酒",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1营收", val: "10.92亿", trend: "down" },
+        { label: "营收增速", val: "-1.46%", trend: "down" },
+        { label: "26Q1净利", val: "2.05亿", trend: "down" },
+        { label: "净利增速", val: "-12.51%", trend: "down" },
+        { label: "100元以下", val: "+21.88%", trend: "up" },
+        { label: "省内收入", val: "-7.87%", trend: "down" },
+        { label: "省外收入", val: "+20.49%", trend: "up" },
+        { label: "互联网", val: "+24.54%", trend: "up" },
+        { label: "合同负债", val: "8.71亿", trend: "up" },
+        { label: "合同负债环比", val: "+6.25%", trend: "up" },
+        { label: "销售费用", val: "1.70亿", trend: "down" },
+        { label: "分红", val: "10派3元", trend: "up" }
+      ],
+      tags: ["收入利润下滑","省外扩张","合同负债充裕","百元光瓶酒"],
+      focus: "26Q1营收10.92亿（-1.46%），净利2.05亿（-12.51%），受政策与宏观经济影响消费场景受限。100元以下+21.88%（占比25%），省内-7.87%，省外+20.49%，互联网+24.54%。合同负债8.71亿（+6.25%），销售费用1.70亿（-8.56%）。每10股派3元。",
+      highlights: "省外+20.49%，互联网+24.54%，合同负债8.71亿蓄水池充裕。100元以下产品高增，产品结构持续优化。",
+      guidance: "聚焦百元以上精准布局，省外和互联网渠道持续拓展，合同负债充裕提供保障。",
+      extra: "深耕甘肃市场，省外扩张和百元价格带布局是关键，合同负债显示渠道信心。"
+    }]
+  },
+  {
+    id: "huiquan-beer", name: "惠泉啤酒", code: "600573.SH", sector: "食品饮料", sub: "啤酒",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报业绩说明会",
+      metrics: [
+        { label: "2025销量", val: "22.17万千升", trend: "neutral" },
+        { label: "2025营收", val: "6.40亿", trend: "neutral" },
+        { label: "2025净利", val: "7999万", trend: "up" },
+        { label: "净利增速", val: "+23.38%", trend: "up" }
+      ],
+      tags: ["利润连增4年","双品牌","中高档布局"],
+      focus: "2025销量22.17万千升，营收6.40亿，净利7999万（+23.38%），利润连续4年20%+增长。惠泉1983+老惠泉双品牌，中高档产品布局。",
+      highlights: "利润连续4年20%+增长，惠泉1983+老惠泉双品牌矩阵清晰。",
+      guidance: "优化中高档产品布局，坚持绿色健康研发方向。",
+      extra: "区域啤酒品牌通过产品升级和效率提升实现连续利润高增长。"
+    }]
+  },
+  {
+    id: "angel-yeast", name: "安琪酵母", code: "600298.SH", sector: "食品饮料", sub: "酵母及衍生物",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1国内收入", val: "25.76亿", trend: "up" },
+        { label: "国内增速", val: "+22.74%", trend: "up" },
+        { label: "26Q1国外收入", val: "19.31亿", trend: "up" },
+        { label: "国外增速", val: "+14.62%", trend: "up" },
+        { label: "26年营收目标", val: "+10%+", trend: "up" },
+        { label: "糖蜜成本", val: "同比下降", trend: "up" },
+        { label: "酵母蛋白", val: "需求旺盛扩产", trend: "up" },
+        { label: "AnPro", val: "蛋白粉/人造肉", trend: "up" },
+        { label: "汇兑管理", val: "锁汇对冲", trend: "neutral" }
+      ],
+      tags: ["国内外高增","糖蜜成本下降","酵母蛋白","AnPro"],
+      focus: "26Q1国内收入25.76亿（+22.74%），国外19.31亿（+14.62%）。糖蜜成本下降利好毛利。酵母蛋白需求旺盛扩产能，AnPro用于蛋白粉/能量棒/人造肉等。26年营收目标+10%+。锁汇应对汇兑损失。",
+      highlights: "国内外收入双高增，糖蜜成本改善毛利，酵母蛋白需求旺盛扩产，AnPro在蛋白粉/能量棒/人造肉前景广阔。",
+      guidance: "26年营收目标+10%+，消费复苏+酵母蛋白扩产驱动增长。",
+      extra: "全球第三/亚洲第一酵母企业，酵母蛋白作为高附加值新品类打开长期成长空间。"
+    }]
+  },
+  {
+    id: "milkground", name: "妙可蓝多", code: "600882.SH", sector: "食品饮料", sub: "奶酪龙头",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月联合调研",
+      metrics: [
+        { label: "26Q1营收", val: "同比+30%+", trend: "up" },
+        { label: "2025液态奶", val: "占比6.51%", trend: "down" },
+        { label: "公积金补亏", val: "10.8亿元", trend: "neutral" },
+        { label: "C端增长", val: "低温/常温/电商", trend: "up" },
+        { label: "B端模式", val: "标杆+经销", trend: "up" },
+        { label: "蒙牛赋能", val: "奶源/供应链/数字化", trend: "up" },
+        { label: "液态奶剥离", val: "平稳过渡", trend: "neutral" }
+      ],
+      tags: ["Q1营收+30%","聚焦奶酪","C端改善","BC双轮","蒙牛赋能","公积金补亏"],
+      focus: "26Q1营收同比+30%+，C端在低温/常温/电商均呈现良好增长势头，B端保持较快增速在餐饮/大客户渠道突破。公积金弥补亏损方案（盈余公积7055万+资本公积10.1亿=10.8亿），实施后未分配利润补至0满足分红条件。液态奶收入占比降至6.51%，剥离坚持平稳过渡。蒙牛全方位赋能（质量/奶源/数字化/营销IP/渠道协同）。",
+      highlights: "Q1营收+30%+全渠道驱动，C端传统商超拐点显现+四大势能渠道布局（零食量贩/会员店/内容电商/即时零售）。BC双轮驱动战略成效显著。蒙牛赋能：CNAS质量检测+国产原制奶酪原料替代+双品牌+双IP+爱氏晨曦+妙可蓝两油一酪格局。B端标杆大客户直营+区域经销覆盖，与头部西快/咖啡/烘焙品牌联名。",
+      guidance: "①巩固Q1收入增长态势力争二至四季度延续；②液态奶剥离平稳过渡不损害公司利益；③蒙牛供应链赋能战略持续深化；④品类结构向多元化/高附加值升级",
+      extra: "新管理层2026年1月换届，蒯玉龙总裁接棒进入新阶段。奶酪健康营养特性推广普及推动消费场景持续扩容。"
+    }]
+  },
+  {
+    id: "yagor_updated", name: "雅戈尔", code: "600177.SH", sector: "纺服", sub: "男装+地产+投资多元化（聚焦服装主业中）",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年报+2026Q1解读",
+      metrics: [
+        { label: "25收入", val: "-26亿", trend: "down" },
+        { label: "时尚利润", val: "-3.4亿", trend: "down" },
+        { label: "服装净利", val: "-2.6亿", trend: "down" },
+        { label: "主品牌", val: "收入-2.3亿", trend: "down" },
+        { label: "分红率", val: "81.5%", trend: "up" },
+        { label: "股息率", val: "~6%", trend: "up" },
+        { label: "26Q1", val: "收入利润双增", trend: "up" },
+        { label: "地产", val: "首次亏损", trend: "down" },
+        { label: "明湖", val: "11月底交付", trend: "neutral" }
+      ],
+      tags: ["地产退出","首次亏损","分红81.5%","Q1修复"],
+      focus: "①收入减少26亿（地产板块退出期规模下降）；②时尚板块利润-3.4亿（剔除小樱桃并购增量后纯服装-2.6亿）；③主品牌收入-2.3亿+成本+2亿→毛利-4.3亿；④小樱桃并购带来增量但当年有是一次性费用；⑤其他品牌毛利率-5.3pct；⑥地产最后一个项目明湖懿秋院11月底才启动交付，仅一个月无法覆盖减值；⑦26Q1服装明显改善（收入利润双增）；⑧2025分红率81.5%（近20亿/股息率~6%）",
+      highlights: "净利润-3.2亿：时尚-3.4亿+地产首次亏损-2.6亿+投资业务增量抵消。小樱桃并购带来营收/毛利/费用增量（毛利和费用增量相当）。主品牌毛利-4.3亿，其他品牌增量只弥补1亿，剩余3亿完全体现在利润下降。26Q1服装板块明显改善，印证25年见底26年修复的判断。",
+      guidance: "①25年见底26年修复，Q1已验证；②高分红持续（81.5%分红率/6%股息率）；③从盈利能力+库存周期角度，25年确实是见底年；④关注26年服装板块修复持续性",
+      extra: "审计调整影响较大，会计准则处理与朴素逻辑理解不太一样。小樱桃给营收毛利费用都带来增量。行业服装品牌Q1陆续出现正反馈。"
+    }]
+  },
+  // ───── 酒店旅游 ─────
+  {
+    id: "huazhu", name: "华住集团", code: "HTHT/01179.HK", sector: "酒店旅游", sub: "中国最大酒店集团",
+    records: [{
+      date: "2026-03", type: "调研", title: "2026年3月联合调研",
+      metrics: [
+        { label: "上半年", val: "RevPAR增速快", trend: "up" },
+        { label: "下半年", val: "ADR驱动", trend: "up" },
+        { label: "Q3 ADR", val: "转正", trend: "up" },
+        { label: "OTA占比", val: "20-25%", trend: "neutral" },
+        { label: "CRS占比", val: "~65%", trend: "up" },
+        { label: "目标", val: "2030年2万家", trend: "up" },
+        { label: "当前覆盖", val: "1400城", trend: "up" },
+        { label: "空白市场", val: "~600城", trend: "up" },
+        { label: "汉庭回本", val: "~4年", trend: "up" }
+      ],
+      tags: ["ADR转正","腾笼换鸟","DH盈利改善","下沉+一线"],
+      focus: "①经营表现：上半年RevPAR增速快于全年平均，下半年恢复由ADR驱动（Q3转折转正Q4更明显），通过梯度定价/品牌价差精细化管理拉动ADR，行业共识维持价格稳定而非降价换OCC；②供给趋缓：当前增速稳定无加速，行业供大于求，未来2-3年供给波动逐步收窄，优质物业获取难度提升；③渠道与需求：OTA 20-25%+CRS~65%，假期分散后淡季不淡旺季饱满需求总量增长，年初休闲为主3月商务需求恢复迹象；④门店扩张：约一半三四线及以下，下沉+一二线优质物业并行，推进腾笼换鸟替换低质量物业；⑤海外DH：25年ADJ EBITDA转正→26年盈亏平衡或小幅盈利，短期提升盈利能力网络无明显动作，东南亚试水签约~10家在营3-4家；⑥长期：2030年目标2万家店/2000个城镇（~15%市占率，当前8-9%），仍有~600个空白市场",
+      highlights: "上半年RevPAR增速更快（Q3隐含增速快），下半年ADR驱动。假期分散后需求总量仍在增长（年初休闲+3月商务恢复迹象）。当前覆盖1400城市（600空白），2030年目标2万家（15%市占率）。DH业务25年ADJ EBITDA转正→26年盈亏平衡。汉庭全季回本周期~4年。",
+      guidance: "①下半年梯度定价+品牌价差精细化管理；②下沉+一二线并行+腾笼换鸟；③DH聚焦盈利改善网络无明显扩张；④管理层重点在门店运营优化+战略规划+产品体系建设",
+      extra: "行业景气时吸引新增供给，景气下行时头部企业加速整合。加盟业务占比提升后业绩波动对整体影响减弱。海外扩张受文化/法规限制仍处初期积累。"
+    }]
+  },
+
+  // ───── 餐饮 ─────
+  {
+    id: "baisheng", name: "百胜中国", code: "YUMC/09987.HK", sector: "餐饮", sub: "中国最大餐饮集团(KFC+必胜客)",
+    records: [{
+      date: "2025-11", type: "调研", title: "2025年11月独立调研",
+      metrics: [
+        { label: "26-28系统销售", val: "中高单位数CAGR", trend: "up" },
+        { label: "SSSG", val: "+0-2%", trend: "up" },
+        { label: "26E门店", val: "20000家", trend: "up" },
+        { label: "28E门店", val: "25000+", trend: "up" },
+        { label: "餐厅利润率", val: "16.2→16.7%", trend: "up" },
+        { label: "经营利润率", val: "10.8→12.5%", trend: "up" },
+        { label: "FCF", val: "双位数CAGR", trend: "up" },
+        { label: "股东回报", val: "9-10亿美元", trend: "up" },
+        { label: "加盟占比", val: "2028E20%+", trend: "up" }
+      ],
+      tags: ["2028年25000+店","餐厅利润率16.7%","每股FCF双位数","加盟20%+"],
+      focus: "①整体目标：resilience&moat，26-28系统销售额中高单位数CAGR+SSSG 0-2%，2026达2万家→2028超2.5万家→2030超3万家，2028/2030分别进入3700+/4500+城镇；②利润：25E餐厅利润率16.2-16.3%→28E16.7%，经营利润率10.8-10.9%→12.5%，每股FCF26-28E双位数CAGR；③KFC：26-28系统销售额中高单位数CAGR+SSSG 0-2%，至2028增至17000+店，加盟占比40-50%，餐厅经营利润率16.9→17.3%，至2028经营利润达100亿；④必胜客：26-28系统销售额高单位数CAGR+SSSG 0-2%，25达4000+→28达6000+店，年均净新开600家维持2-3年回收期，加盟占比60-70%，餐厅经营利润率12.0→14.5%，28/29E OP达2.68/3.06亿；⑤加盟模式：至2028E加盟门店占比20%+，系统销售占比10%+，收入占比5-9%，营业利润占比5-9%；⑥外卖&会员：有长线安排和平台谈判稳妥，明年外卖比例上升但整体可控(掌握在自己手上生意仍有60-70%)，部分促销仅限堂食及会员；⑦M&A门槛很高严格对待，没改变股东回馈计划；⑧同店增长信心：KFC经典产品势能不减，最强信心源自团队(23意识到变化24着手做肯悦与WOW)，有能力做好多元化业务",
+      highlights: "2026E达2万家门店。KFC经营利润2028E目标100亿。必胜客加速利润率提升(12→14.5%)。加盟模式2028E占比20%+。年均资本支出6-7亿美元。",
+      guidance: "①KFC经典产品势能不减+多元化(肯悦+WOW)；②必胜客单店利润率提升抓手：简化菜单+简化管理工作+设备自动化；③加盟作为增量增长杠杆加速扩张；④M&A门槛很高严格对待；⑤外卖比例上升但可控(自有60-70%)",
+      extra: "必胜客26-28E年均净新开600家店。加盟营业利润率~10%。2027-28E年均股东回报9-10亿美元。"
+    }]
+  },
+  {
+    id: "hushang", name: "沪上阿姨", code: "02297.HK", sector: "餐饮", sub: "新茶饮品牌（北方密度优势）",
+    records: [{
+      date: "2025-11", type: "调研", title: "2025年11月联合调研",
+      metrics: [
+        { label: "Q3 GMV", val: "月均30%+", trend: "up" },
+        { label: "同店增速", val: "20%+", trend: "up" },
+        { label: "Q3新开门店", val: "1000家", trend: "up" },
+        { label: "月均开店", val: "400-500家", trend: "up" },
+        { label: "二店率", val: "60%老加盟商", trend: "up" },
+        { label: "加盟商盈利", val: "提升50%+", trend: "up" },
+        { label: "茶瀑布", val: "1000家/投10w", trend: "up" },
+        { label: "沪上咖啡", val: "80+家/15%杯占比", trend: "up" },
+        { label: "26年目标", val: "净开1500-2000家", trend: "up" }
+      ],
+      tags: ["Q3开店加速","加盟商盈利+50%","茶瀑布下沉","沪上咖啡"],
+      focus: "①Q3 GMV增速月度平均30%+，9月平台补贴减弱但同店仍保持20%+，10月高双位数（实收口径低于GMV）；②开店加速：Q3沪上阿姨新开门店1000家，月均400-500家，其中60%为老加盟商开2店，茶瀑布截至10月授权1000家（实开~800家，年底实开1000家），全年闭店率同比持平（~30%公司主动闭店淘汰尾部）；③Q2-Q3加盟商盈利水平提升50%+；④茶瀑布：初始投资10w，加盟商端毛利~60%定位下沉市场校园/乡镇店，公司端原材料毛利25-30%；⑤沪上咖啡：前店中店暂缓→原有咖啡机门店全量上线，试点甄选店（更好的咖啡机+咖啡豆），80+家推行中，上线超30天门店平均咖啡杯占比~15%，北方咖啡格局更松散（大竞对只有瑞幸）存在突破空间；⑥外卖补贴平台主导，大品牌有经验选择性响应（纯茶等快速响应），小品牌增收不增利→头部集中；⑦26年目标：同店持平或微涨，新店落地2000-3000家（净开1500-2000家），2Q26起有少许高基数压力",
+      highlights: "GMV Q3月均30%+增速，补贴减弱仍20%+同店。Q3开店1000家（月均400-500家），60%老加盟商开2店。加盟商盈利提升50%+。茶瀑布新品牌下沉市场10w起步。沪上咖啡80+家试点杯占比15%。北方市场存在认知壁垒但格局更松。",
+      guidance: "①巩固北方门店密度优势；②部分省份用茶瀑布打入市场；③外卖补贴经验快速响应摸清平台玩法；④26年同店持平微涨+净开1500-2000家灵活调整",
+      extra: "北方品牌进北方很难快速摸清know-how，公司经验更丰富。外卖平台补贴下小品牌多数增收不增利加速头部集中。"
+    }]
+  },
+  {
+    id: "lutaia", name: "鲁泰A", code: "000726.SZ", sector: "纺服", sub: "高档色织布龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026年Q1投资者交流",
+      metrics: [
+        { label: "Q1收入", val: "-6.69%", trend: "down" },
+        { label: "Q1环比", val: "-15%", trend: "down" },
+        { label: "Q1净利", val: "-36%", trend: "down" },
+        { label: "扣非", val: "-22%", trend: "down" },
+        { label: "Q1环比净利", val: "+3pct", trend: "up" },
+        { label: "扣非环比", val: "+7pct", trend: "up" },
+        { label: "毛利率", val: "环比+0.27pct", trend: "up" },
+        { label: "同比毛利", val: "-<1pct", trend: "down" },
+        { label: "盈利", val: "好转", trend: "up" }
+      ],
+      tags: ["同比下滑","环比改善","盈利好转","筑底回升"],
+      focus: "①Q1收入同比-6.69%（环比-15%更大）；②净利同比-36%但环比+3pct，扣非同比-22%但环比+7pct；③毛利率同比略降<1pct但环比+0.27pct；④环比改善说明经营状况有所好转",
+      highlights: "Q1收入同比降6.69%（环比降15%幅度更大）。归母净利同比-36%但环比+3pct。扣非同比-22%但环比+7pct。毛利率同比略降但环比提升。环比角度看盈利状况好转。",
+      guidance: "关注环比改善趋势的持续性。",
+      extra: "行业处于筑底回升态势。"
+    }]
+  },
+  // ---- 新增:家电 ----
+  {
+    id: "roborock", name: "石头科技", code: "688169.SH", sector: "家电", sub: "智能扫地机器人全球龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026年4月投资者关系管理活动记录表",
+      metrics: [
+        { label: "2025营收", val: "186.95亿(+56.51%)", trend: "up" },
+        { label: "26Q1营收", val: "42.27亿(+23.31%)", trend: "up" },
+        { label: "26Q1净利", val: "3.23亿(+20.83%)", trend: "up" },
+        { label: "全球清洁机器人", val: "17.7%市占第一", trend: "up" },
+        { label: "洗地机国内", val: "市占率第二", trend: "up" },
+        { label: "智能割草机", val: "2025年9月IFA发布", trend: "up" },
+        { label: "G-Rover", val: "双轮足架构", trend: "up" },
+        { label: "以旧换新", val: "政策推动", trend: "up" },
+        { label: "越南产能", val: "2024年10月量产", trend: "up" },
+        { label: "马来西亚产能", val: "2025年拓展", trend: "up" }
+      ],
+      tags: ["全球龙头","具身智能","洗地机","割草机","全球化产能"],
+      focus: "①2025年营收186.95亿+56.51%,26Q1营收42.27亿+23.31%净利3.23亿+20.83%;②全球清洁机器人17.7%市占率第一;③洗地机国内市占率第二,2025Q3起出海;④智能割草机2025年9月IFA发布年底出货,覆盖国家广渠道偏线下;⑤G-Rover轮足式机器人双轮足架构AI实时感知;⑥美国关税退税已提交申请,越南+马来西亚多元化产能",
+      highlights: "2025年全球清洁机器人17.7%市占率稳居全球首位。洗地机上半年国内市占率首次跃居第二。智能割草机德国IFA发布,26Q1市场反馈积极。G-Rover双轮足独立伸缩调高,拓展清洁场景从二维到三维。美国关税退税流程积极推进中。",
+      guidance: "延续全球化战略,以AI算法/智能感知/仿生机械臂为支撑。割草机策略偏保守稳健,重视渠道建设,有序拓展。关税退税政策有不确定性,通过越南/马来西亚产能布局应对。原材料成本影响可控。",
+      extra: "洗地机产品矩阵从A30 Lite到A30 Pro Steam全价位段。RRmind GPT/SLAM算法迭代降本。海外深化北美/欧洲/亚太,多国市占率登顶。"
+    }]
+  },
+  {
+    id: "supor", name: "苏泊尔", code: "002032.SZ", sector: "家电", sub: "炊具/小家电龙头",
+    records: [{
+      date: "2026-04", type: "电话会", title: "2026年Q1业绩电话会",
+      metrics: [
+        { label: "26Q1营收", val: "58.82亿(+1.65%)", trend: "up" },
+        { label: "26Q1净利", val: "5.05亿(+1.68%)", trend: "up" },
+        { label: "内外销", val: "均增长", trend: "up" },
+        { label: "线上渠道", val: "抖音/拼多多增速快", trend: "up" },
+        { label: "钛材质", val: "全系列产品应用", trend: "up" },
+        { label: "关联交易", val: "73.60亿全年", trend: "neutral" },
+        { label: "越南基地", val: "承接北美订单", trend: "neutral" },
+        { label: "原材料", val: "套保稳定价格", trend: "neutral" }
+      ],
+      tags: ["稳健增长","产品创新","渠道优势","关联交易"],
+      focus: "①26Q1营收58.82亿+1.65%,净利5.05亿+1.68%;②线上占比高,天猫京东为主力,抖音拼多多增速快;③钛材质全系列应用,推出小方糖破壁机/远红外龙卷风空气炸锅;④越南基地承接北美订单,动态调整;⑤铝/不锈钢上涨但空间有限,套保+锁价应对",
+      highlights: "消费需求偏弱背景下,凭借渠道运营+产品创新实现增长。电饭煲/电压力锅/电水壶/炒锅稳定,健康相关品类+饮具+厨房小工具增长良好。抖音和拼多多增速较快贡献增量。",
+      guidance: "坚持产品创新战略,材质/工艺/功能升级提升竞争力,优化产品与价格组合。2026年全年关联交易指引73.60亿。积极开拓新外贸客户。",
+      extra: "铝/不锈钢短期上涨空间有限,塑料原料价格受原油波动不确定性,内部精益+供应商锁价降本。"
+    }]
+  },
+  {
+    id: "deerma", name: "德尔玛", code: "301332.SZ", sector: "家电", sub: "新兴小家电品牌",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026年4月28日业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "34.32亿", trend: "neutral" },
+        { label: "2025归母", val: "1.30亿", trend: "neutral" },
+        { label: "26Q1营收", val: "6.49亿", trend: "neutral" },
+        { label: "26Q1归母", val: "2178万", trend: "neutral" },
+        { label: "双品牌", val: "飞利浦+德尔玛", trend: "up" },
+        { label: "海外拓展", val: "北美/欧洲/东南亚", trend: "up" },
+        { label: "水健康", val: "持续增长", trend: "up" },
+        { label: "自有品牌", val: "阶段性调整", trend: "neutral" }
+      ],
+      tags: ["双品牌","海外布局","经营质量优先"],
+      focus: "①2025年营收34.32亿归母1.30亿,26Q1营收6.49亿归母2178万;②双品牌并行:飞利浦承接水健康/个护健康,德尔玛聚焦性价比;③飞利浦重点北美/欧洲/东南亚,拓展澳洲/新加坡/拉美;④德尔玛巩固俄罗斯/东南亚,拓展中东;⑤自有品牌处于阶段性调整中",
+      highlights: "海外双品牌差异化推进策略。飞利浦品牌在海外获品牌背书优势,德尔玛品牌在俄罗斯/东南亚有基础。欧美市场客单价和毛利水平相对较高。",
+      guidance: "经营质量优先,围绕水健康/个护健康/海外拓展/自有品牌优化。水健康持续增长+个护健康+海外突破+自有品牌结构调整四大驱动。",
+      extra: "新市场以产品适配+渠道建设为核心,内容营销+终端呈现+品牌识别体系建设。"
+    }]
+  },
+  {
+    id: "sanhua", name: "三花智控", code: "002050.SZ", sector: "家电", sub: "制冷空调+汽车热管理+机器人零部件龙头",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月16日新加坡路演",
+      metrics: [
+        { label: "2025营收", val: "310.12亿(+10.97%)", trend: "up" },
+        { label: "2025归母", val: "40.63亿(+31.10%)", trend: "up" },
+        { label: "2025毛利率", val: "28.78%(+1.31pct)", trend: "up" },
+        { label: "26Q1营收", val: "77.74亿(+1.36%)", trend: "up" },
+        { label: "26Q1归母", val: "9.28亿(+2.68%)", trend: "up" },
+        { label: "26Q1扣非", val: "9.86亿(+15.52%)", trend: "up" },
+        { label: "Q1经营现金流", val: "+136.50%", trend: "up" },
+        { label: "制冷空调", val: "185.85亿(+12.22%)", trend: "up" },
+        { label: "制冷毛利率", val: "28.77%", trend: "neutral" },
+        { label: "汽车零部件", val: "124.27亿(+9.14%)", trend: "up" },
+        { label: "NEV热管理", val: "6375万套", trend: "up" },
+        { label: "海外基地", val: "墨西哥/波兰/越南/泰国", trend: "up" },
+        { label: "机器人", val: "机电执行器研发送样", trend: "up" },
+        { label: "CO2", val: "5000万套产能改造", trend: "up" },
+        { label: "毛利率趋势", val: "历史新高", trend: "up" },
+        { label: "铜价对冲", val: "联动+套保", trend: "neutral" }
+      ],
+      tags: ["热管理龙头","机器人","全球化","集成化"],
+      focus: "①2025年营收310.12亿+10.97%,归母40.63亿+31.10%,毛利率28.78%(+1.31pct创历史新高);②26Q1营收77.74亿+1.36%,归母9.28亿+2.68%,扣非9.86亿+15.52%,经营现金流+136.50%;③制冷185.85亿+12.22%(59.9%),汽车124.27亿+9.14%(40.1%);④NEV热管理6375万套,CO2系统5000万套产能改造;⑤4个海外基地(墨西哥/波兰/越南/泰国);⑥机器人机电执行器配合客户研发送样",
+      highlights: "2025年毛利率创历史新高28.78%。制冷稳健增长12.22%,汽车增长9.14%。扣非净利增长15.52%强于归母(非经常性因素扰动)。集成化模块优化产品结构提升附加值。",
+      guidance: "制冷稳健增长(成熟市场),汽车热管理紧抓NEV机遇,机器人有望成为第三增长曲线。铜价联动定价+套保对冲原材料波动。集成化标准化提升附加值。",
+      extra: "CO2热管理系统5000万套/年产能技改推进中。机器人业务扩大海外生产+扩充研发团队。年度降价行业惯例,技术创新/新材料替代消化。"
+    }]
+  },
+  // ---- 新增:美护 ----
+  {
+    id: "doctor-glasses", name: "博士眼镜", code: "300622.SZ", sector: "美护", sub: "眼镜零售连锁+智能眼镜",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月29日投资者关系活动记录表",
+      metrics: [
+        { label: "门店数", val: "225家", trend: "up" },
+        { label: "功能镜片", val: "39.68%销售占比", trend: "neutral" },
+        { label: "毛利率", val: "61.71%→60.57%", trend: "down" },
+        { label: "智能眼镜", val: "1概念店+160+专柜", trend: "up" },
+        { label: "店扩张", val: "持续开店", trend: "up" },
+        { label: "智能合作", val: "多品牌联动", trend: "up" },
+        { label: "验光服务", val: "核心竞争力", trend: "neutral" },
+        { label: "渠道优化", val: "门店质量提升", trend: "up" }
+      ],
+      tags: ["智能眼镜","连锁零售","功能镜片","渠道优化"],
+      focus: "①225家门店持续扩张;②智能眼镜:1家概念店+160+专柜布局,多品牌合作;③功能镜片占销售39.68%;④毛利率61.71%→60.57%略降;⑤智能眼镜渠道合作深化",
+      highlights: "智能眼镜概念店+160+专柜渠道布局领先。功能镜片占比近40%。门店网络持续扩张。",
+      guidance: "持续优化门店质量,深化智能眼镜渠道合作,提升功能镜片占比。",
+      extra: "验光服务为核心竞争力,智能眼镜渠道为行业先行者。"
+    }]
+  },
+  {
+    id: "dengkang", name: "登康口腔", code: "001328.SZ", sector: "美护", sub: "口腔护理（冷酸灵品牌）",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度网上业绩说明会",
+      metrics: [
+        { label: "分红方案", val: "10派8.5元", trend: "up" },
+        { label: "分红比例", val: "80.82%", trend: "up" },
+        { label: "电商增速", val: "22.33%", trend: "up" },
+        { label: "电商占比", val: "34.26%", trend: "up" },
+        { label: "毛利率", val: "持续改善", trend: "up" },
+        { label: "线上毛利", val: "高于线下", trend: "up" },
+        { label: "行业地位", val: "线下前三", trend: "up" }
+      ],
+      tags: ["高分红80%","电商+22%","冷酸灵","高端新品"],
+      focus: "①高分红：每10股派8.5元，占净利80.82%；②电商增速22.33%，占比提升至34.26%；③毛利率持续改善（产品结构升级驱动，高端新品占比提升）；④线下市场行业前三地位稳固；⑤KA和分销渠道双驱动",
+      highlights: "毛利率持续改善核心驱动力为产品结构升级。高分红80.82%响应监管号召。电商占比超34%。线上渠道毛利率高于线下。冷酸灵品牌深耕抗敏细分领域。智能口腔与口腔医疗产品线不断丰富。",
+      guidance: "①2026线上投放以爆品孵化为目标，品效销一体；②海外市场布局从策略/品牌/产品/渠道稳健推进；③针对不同用户人群和渠道的差异化新品上市计划；④KA和分销渠道持续深化",
+      extra: "牙膏品类线上线下均呈现积极增长趋势。营销+研发双轮驱动战略。"
+    }]
+  },
+  // ---- 新增:食品饮料 ----
+  {
+    id: "ligao", name: "立高食品", code: "300973.SZ", sector: "食品饮料", sub: "冷冻烘焙龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026年4月27日业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "43.54亿(+13.51%)", trend: "up" },
+        { label: "2025归母", val: "3.05亿(+13.71%)", trend: "up" },
+        { label: "26Q1营收", val: "10.48亿(+0.27%)", trend: "up" },
+        { label: "26Q1归母", val: "6402万(-27.56%)", trend: "down" },
+        { label: "冷冻烘焙", val: "53%收入占比", trend: "neutral" },
+        { label: "烘焙原料", val: "47%占比+21%", trend: "up" },
+        { label: "UHT奶油", val: "8.5亿+", trend: "up" },
+        { label: "商超渠道", val: "地方性商超+50%", trend: "up" },
+        { label: "餐饮新零售", val: "22%占比+25%", trend: "up" },
+        { label: "流通饼房", val: "筑底企稳", trend: "neutral" }
+      ],
+      tags: ["冷冻烘焙","烘焙原料","渠道多元化","大单品"],
+      focus: "①2025年营收43.54亿+13.51%,归母3.05亿+13.71%;②26Q1归母6402万-27.56%(费用端:广州产能调整储备+信息化投入+餐饮扩编);③烘焙原料+21%,UHT奶油8.5亿+,冷冻烘焙+7%;④商超渠道27%占比+25%,地方性商超+50%;⑤餐饮新零售+25%;⑥流通饼房筑底企稳",
+      highlights: "烘焙食品原料快速增长,UHT奶油超8.5亿。商超渠道27%占比+25%,地方性商超+50%超预期。餐饮新零售+25%持续高增长。油脂/乳制品原料锁单充裕成本可控。",
+      guidance: "大单品+大客户+多元渠道。稀奶油新国标前低后高。广州产能搬迁管理费用短期承压,规模效应后续体现。餐饮渠道扩编把握长期机会。",
+      extra: "稀奶油新国标3月实施,5月上海烘焙展重点推介。披萨产线开发流通饼底产品。油脂原料锁单至年中,乳制品锁单充裕。"
+    }]
+  },
+  {
+    id: "jinzai", name: "劲仔食品", code: "003000.SZ", sector: "食品饮料", sub: "休闲零食(鱼制品龙头)",
+    records: [{
+      date: "2026-04", type: "电话会", title: "2026年4月23日电话会议",
+      metrics: [
+        { label: "2025营收", val: "24.43亿", trend: "up" },
+        { label: "2025净利", val: "2.4亿", trend: "up" },
+        { label: "26Q1营收", val: "7.39亿(+24.16%)", trend: "up" },
+        { label: "26Q1净利", val: "7125万(+5.48%)", trend: "up" },
+        { label: "26Q1扣非", val: "6564万(+23%)", trend: "up" },
+        { label: "鱼制品", val: "16亿+大单品", trend: "up" },
+        { label: "直营占比", val: "35.37%", trend: "up" },
+        { label: "零食渠道", val: "增速快", trend: "up" },
+        { label: "大包装", val: "30%占比", trend: "up" },
+        { label: "小包装", val: "54%占比", trend: "up" }
+      ],
+      tags: ["大单品战略","全渠道","零食渠道","鱼制品"],
+      focus: "①2025年营收24.43亿净利2.4亿,26Q1营收7.39亿+24.16%净利7125万+5.48%;②鱼制品突破16亿,肉制品快速增长,豆制品恢复,鹌鹑蛋企稳;③零食渠道下半年提速,Q1继续保持;④直营占比35.37%+47.79%;⑤大包装30%提升自零食渠道定量装;⑥鳀鱼价格略上浮,鹌鹑蛋阶段性上涨",
+      highlights: "鱼制品突破16亿成超级大单品。零食渠道增速快,直营占比提升至35.37%。大包装30%占比(定量装突破)。肉制品细分品类竞争力强,豆制品周鲜鲜/爆嫩创新产品。",
+      guidance: "大单品+全渠道战略不动摇。鱼制品完善定量装SKU覆盖全渠道。肉制品丰富SKU适配全渠道。积极拥抱零食量贩/O2O等新兴渠道。国际贸易渠道继续拓展。",
+      extra: "2026年员工持股计划覆盖更多核心骨干。鳀鱼海外供应渠道开发中。新工厂产能逐步稳定。"
+    }]
+  },
+  {
+    id: "ganyuan", name: "甘源食品", code: "002991.SZ", sector: "食品饮料", sub: "休闲食品(豆类+坚果)",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度暨2026年Q1业绩说明会",
+      metrics: [
+        { label: "Q1各渠道", val: "协同发力", trend: "up" },
+        { label: "经典豆", val: "老三样基本盘", trend: "up" },
+        { label: "风味坚果", val: "新品类", trend: "up" },
+        { label: "商超", val: "恢复增长", trend: "up" },
+        { label: "零食量贩", val: "良好增长", trend: "up" },
+        { label: "电商", val: "新品首发主阵地", trend: "up" },
+        { label: "海外", val: "印尼/马来西亚0到1", trend: "up" },
+        { label: "山姆供货", val: "黄豆粉裹黄豆", trend: "up" }
+      ],
+      tags: ["全渠道","豆类+坚果","海外拓展","山姆供货"],
+      focus: "①Q1各渠道协同发力;②老三样基本盘稳固,线下铺货率高;③商超优化经销商结构后恢复增长;④零食量贩持续增长;⑤电商定位新品首发+品牌营销;⑥风味坚果快速发展;⑦海外印尼/马来西亚0到1突破;⑧山姆黄豆粉裹黄豆3月上市",
+      highlights: "经典豆类+风味坚果多元矩阵。商超优化后恢复增长,零食量贩持续增长,电商新品拉动。海外印尼/马来西亚本土化产品陆续进入渠道。山姆黄豆粉裹黄豆上市获积极认可。",
+      guidance: "聚焦渠道质量改善+新品培育+海外布局。风味坚果做品类定义者。持续探寻潜力品类。",
+      extra: "豆制品技术积累优势强,周鲜鲜/爆嫩创新产品。现金流稳健,毛利率行业较好水平。"
+    }]
+  },
+  {
+    id: "sanzhisongshu", name: "三只松鼠", code: "300783.SZ", sector: "食品饮料", sub: "休闲零食全渠道龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度业绩说明会",
+      metrics: [
+        { label: "26Q1营收", val: "38.35亿(+3.01%)", trend: "up" },
+        { label: "26Q1归母", val: "2.73亿(+14.35%)", trend: "up" },
+        { label: "26Q1扣非", val: "2.46亿(+51.59%)", trend: "up" },
+        { label: "高端性价比", val: "总战略", trend: "up" },
+        { label: "生活馆", val: "33家门店", trend: "up" },
+        { label: "电商利润", val: "较大增长", trend: "up" },
+        { label: "四大基地", val: "全国集约", trend: "up" },
+        { label: "回购", val: "1-2亿", trend: "up" },
+        { label: "现金分红", val: "4676万(30.10%)", trend: "up" },
+        { label: "信披考核", val: "连续5年A级", trend: "up" }
+      ],
+      tags: ["高端性价比","生活馆","D+N全渠道","四大基地"],
+      focus: "①26Q1营收38.35亿+3.01%,归母2.73亿+14.35%,扣非2.46亿+51.59%;②高端性价比战略+一低两高组织导向;③生活馆33家门店,平价社区超市定位;④短视频电商精准运营盈利,线下分销工厂直发;⑤全国四大集约基地+四大原料基地+海外柬埔寨芒果干工厂;⑥回购1-2亿,连续5年信披A级",
+      highlights: "电商渠道利润较大增长,短视频电商精准运营实现盈利。线下分销工厂直发模式跑通。生活馆33家市场反馈良好。四大集约基地形成覆盖核心品类的产能网络。小鹿蓝蓝/饿了个喵/金牌萌神子品牌布局。",
+      guidance: "基本盘稳中求进,生活馆进中求稳。集团总部-事业部-经营体三层架构。华南基地投产,四大基地产能网络。构建产地直供+区域冷链+自有品牌三大核心能力。",
+      extra: "CMA+CNAS检测资质,300+台检验设备。柬埔寨芒果干工厂本地化采购+标准化加工。宠物品牌'饿了个喵'和'金牌萌神'。"
+    }]
+  },
+  {
+    id: "byhealth", name: "汤臣倍健", code: "300146.SZ", sector: "食品饮料", sub: "VDS保健品龙头",
+    records: [{
+      date: "2026-04", type: "电话会", title: "2026年Q1投资者业绩电话会",
+      metrics: [
+        { label: "Q1收入", val: "增长", trend: "up" },
+        { label: "主品牌", val: "增长不错", trend: "up" },
+        { label: "健力多", val: "增长不错", trend: "up" },
+        { label: "线上渠道", val: "双位数增长", trend: "up" },
+        { label: "抖音占比", val: "主品牌10%/lifespace30%+", trend: "neutral" },
+        { label: "毛利率", val: "提升", trend: "up" },
+        { label: "药店渠道", val: "略降", trend: "down" },
+        { label: "商超渠道", val: "双位数增长", trend: "up" },
+        { label: "VDS大盘", val: "下滑十几个点", trend: "down" },
+        { label: "OTC氨糖", val: "新品推出", trend: "up" }
+      ],
+      tags: ["VDS龙头","线上增长","抖音渠道","商超突破"],
+      focus: "①Q1收入增长,主品牌/健力多/lifespace增长不错;②线上双位数增长,抖音增速优于天猫京东;③毛利率提升(原料先进先出法,线上占比提升对冲);④药店收入略降全年稳定,VDS大盘下滑十几个点;⑤商超双位数增长重点渠道;⑥健力多OTC硫酸氨糖新品补充",
+      highlights: "线上渠道双位数增长,抖音占主品牌线上10%/lifespace超30%。商超双位数增长,强化高潜力连锁合作。健力多推出首个OTC硫酸氨糖。线上毛利率明显高于线下,线上占比提升对冲成本压力。",
+      guidance: "聚焦收入增长突破,多渠道多品类发力,销售费用率同比提升,上半年投入占比高于去年。抖音持续补充自播/BD/内容人员。后续季度增长压力较Q1更小。",
+      extra: "氨糖品类布局:线下OTC+线上跨境高含量+运动营养系列。线上各平台毛利率差异不大。"
+    }]
+  },
+  // ---- 新增:农业 ----
+  {
+    id: "qsagritech", name: "荃银高科", code: "300087.SZ", sector: "农业", sub: "种业国企(先正达成员)",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度网上业绩说明会",
+      metrics: [
+        { label: "2025业绩", val: "亏损超2亿", trend: "down" },
+        { label: "经营现金流", val: "大幅改善", trend: "up" },
+        { label: "新品种审定", val: "57个国家级", trend: "up" },
+        { label: "水稻品种", val: "52个", trend: "up" },
+        { label: "玉米品种", val: "5个转基因", trend: "up" },
+        { label: "中种集团", val: "11.85要约", trend: "neutral" },
+        { label: "分红", val: "0(亏损)", trend: "down" },
+        { label: "RiceNavi", val: "导航育种", trend: "up" },
+        { label: "生物育种", val: "先正达成员", trend: "up" },
+        { label: "66香", val: "品牌米", trend: "up" }
+      ],
+      tags: ["种业国企","先正达","生物育种","亏损减值"],
+      focus: "①2025年亏损超2亿(行业高库存+同质化+减值准备);②经营现金流大幅改善;③57个新品种国家审定(水稻52+玉米5),44个省级审定;④中种11.85要约价浮亏;⑤5个玉米转基因品种审定,中科荃银设计育种体系;⑥证监会立案调查中;⑦RiceNavi导航育种+生物育种;⑧66香品牌产业一体化",
+      highlights: "种业国企龙头,先正达成员。57个新品种审定。生物育种作为先正达成员积极推进。RiceNavi导航育种技术。经营现金流大幅改善。",
+      guidance: "聚焦种业主业,压降非核心低效业务。优化产品结构差异化品种。加强知识产权。加大海外走出去。强化现金流管理保障资金链安全。",
+      extra: "立案调查推进中不影响经营。亏损无分红,后续盈利回暖推进现金分红。压降农服农资非核心业务。"
+    }]
+  },
+  {
+    id: "ruipubio", name: "瑞普生物", code: "300119.SZ", sector: "农业", sub: "动物动保龙头",
+    records: [{
+      date: "2026-04", type: "路演", title: "2026年4月28日电话会议",
+      metrics: [
+        { label: "26Q1营收", val: "8.26亿(+0.55%)", trend: "up" },
+        { label: "26Q1扣非", val: "9547万(+2.15%)", trend: "up" },
+        { label: "扣非(剔除增值税)", val: "+30%+", trend: "up" },
+        { label: "宠物板块", val: "+20%+", trend: "up" },
+        { label: "国际化", val: "+20%+", trend: "up" },
+        { label: "增值税率", val: "3%→13%", trend: "down" },
+        { label: "生物制造", val: "中试完成", trend: "up" },
+        { label: "猫传腹疫苗", val: "临床试验", trend: "up" },
+        { label: "注册产品海外", val: "50+个", trend: "up" },
+        { label: "中瑞供应链", val: "深化整合", trend: "up" }
+      ],
+      tags: ["动保龙头","宠物板块","生物制造","增值税影响"],
+      focus: "①26Q1营收8.26亿+0.55%,扣非9547万+2.15%(剔除增值税率影响+30%+);②增值税3%→13%政策性影响;③宠物板块+20%+(中瑞供应链+猫三联/驱虫药/猫干扰素);④国际化+20%+(禽用疫苗,覆盖东南亚/南美/俄语区/一带一路,注册50+产品);⑤生物制造6.79亿中试完成;⑥猫传腹疫苗临床批件试验中",
+      highlights: "剔除增值税率影响扣非+30%+。宠物+国际化双20%+增速。生物制造中试完成具备产业化基础。猫传腹疫苗临床推进中。",
+      guidance: "稳畜禽+强宠物+拓生物制造三位一体战略。优化产品结构高毛利高附加值。工艺优化+供应链协同降本增效。加强进项税抵扣管理。",
+      extra: "中瑞供应链持续深化渠道整合,并购+运营优化。猫干扰素核心产品销售带动。"
+    }]
+  },
+  {
+    id: "chenlight", name: "晨光生物", code: "300138.SH", sector: "农业", sub: "天然植物提取物龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度业绩网上说明会",
+      metrics: [
+        { label: "核心产品", val: "辣椒红/精/叶黄素", trend: "up" },
+        { label: "三大产品", val: "产销量世界前列", trend: "up" },
+        { label: "甜菊糖苷", val: "代糖品种", trend: "up" },
+        { label: "天然提取物", val: "多品种矩阵", trend: "up" },
+        { label: "赞比亚", val: "海外基地", trend: "neutral" },
+        { label: "三步走", val: "第二步推进中", trend: "up" },
+        { label: "回购注销", val: "9.32%已完成", trend: "up" },
+        { label: "分红", val: "上市以来新高", trend: "up" },
+        { label: "低成本生产", val: "核心优势", trend: "up" },
+        { label: "饲料添加剂", val: "异绿原酸+菊素", trend: "up" }
+      ],
+      tags: ["植物提取","辣椒红","甜菊糖苷","三步走"],
+      focus: "①辣椒红/精/叶黄素产销量连续多年世界前列;②甜菊糖苷(天然代糖)+罗汉果提取物规划;③三步走战略第二步:十个世界前四产品,提取物产业基地;④赞比亚子公司影响Q1利润;⑤2024年回购注销9.32%股份;⑥2025年度分红上市以来新高;⑦核心优势:低成本工业化生产;⑧饲料添加剂推广期(收入<1%);⑨棉籽业务对锁经营+期货套保",
+      highlights: "核心三大产品世界前列。甜菊糖苷+罗汉果布局天然代糖。低成本工业化生产为核心竞争力。回购注销9.32%稳定信心。分红创上市新高。",
+      guidance: "第二步战略目标逐步实现。替代合成色素趋势利好。饲料添加剂通过下游配方服务加速推广。棉籽对锁经营规避价格波动。全球原料基地布局。",
+      extra: "天然色素替代合成色素:稳定性/着色力/调色是主要障碍,公司已有多项技术储备。番茄红素/辣椒红/叶黄素推出制剂型产品。"
+    }]
+  },
+  {
+    id: "wens", name: "温氏股份", code: "300498.SZ", sector: "农业", sub: "生猪/肉鸡养殖龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度及2026年Q1业绩说明会",
+      metrics: [
+        { label: "市值管理", val: "制度执行中", trend: "neutral" },
+        { label: "中期分红", val: "20亿", trend: "up" },
+        { label: "年度分红", val: "13.2亿预案", trend: "up" },
+        { label: "2025累计分红", val: "33.1亿(63%)", trend: "up" },
+        { label: "上市累计分红", val: "314亿+", trend: "up" },
+        { label: "股份回购", val: "25.3亿(3次)", trend: "up" },
+        { label: "信披评级", val: "深交所A级(6次)", trend: "up" },
+        { label: "投关活动", val: "92场/1137家机构", trend: "up" },
+        { label: "猪价展望", val: "下半年好于上半年", trend: "up" },
+        { label: "战略投资", val: "恒鑫生物+双安", trend: "up" }
+      ],
+      tags: ["养殖龙头","高分红","市值管理","下半年猪价"],
+      focus: "①2025年中期分红20亿+年度分红预案13.2亿,累计33.1亿(占归母63%);②上市累计分红314亿+,回购25.3亿(3次);③信披深交所A级(近7年6次);④92场投关活动接待1137家机构;⑤猪价预计下半年好于上半年;⑥战略投资食品添加剂明胶恒鑫生物+宠物食品青岛双安;⑦温润投资参股不并表(在管120亿+,100+企业,30+上市)",
+      highlights: "高分红:累计分红314亿+。2025年累计分红33.1亿占归母63%。战略投资恒鑫生物(明胶/胶原蛋白)和青岛双安(宠物食品)。",
+      guidance: "猪价预计下半年好于上半年。市值管理制度持续执行。战略投资围绕主业协同布局。",
+      extra: "温润投资在管120亿+,布局硬科技/先进制造/消费健康,30+已上市,参股不并表。"
+    }]
+  },
+  // ---- 新增:轻工 ----
+  {
+    id: "sawei", name: "赛维时代", code: "301381.SZ", sector: "轻工", sub: "跨境电商服饰龙头",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月28-30日调研",
+      metrics: [
+        { label: "Q1汇兑", val: "亏损较大", trend: "down" },
+        { label: "服饰业务", val: "Q1增速回升", trend: "up" },
+        { label: "非服饰库存", val: "8.25亿→2.93亿", trend: "up" },
+        { label: "运价锁价", val: "长协+灵活", trend: "neutral" },
+        { label: "AI深度", val: "全链路覆盖", trend: "up" },
+        { label: "线下KA", val: "Walmart/Target", trend: "up" },
+        { label: "越南工厂", val: "战略备份", trend: "neutral" },
+        { label: "关税退税", val: "密切关注", trend: "neutral" }
+      ],
+      tags: ["跨境电商","服饰","AI全链路","关税应对"],
+      focus: "①Q1汇兑亏损较大(美元欧元贬值+波动);②服饰业务Q1增速回升(经营节奏恢复);③非服饰库存8.25亿→2.93亿,26年亏损大幅收窄;④长协锁价+灵活调控运输成本;⑤AI全链路覆盖(设计/供应链/广告/客服);⑥线下KA:Walmart首批订单落地,Target/TJ Maxx/Costco洽谈中;⑦越南工厂+东南亚外协战略备份;⑧欧洲收入占比提升",
+      highlights: "服饰Q1增速回升,经营节奏全面恢复。非服饰库存从8.25亿降至2.93亿,亏损大幅收窄。Walmart线下首批订单落地。AI全链路深度覆盖。",
+      guidance: "服饰业务净利率维持历史中枢。非服饰亏损大幅收窄。线下KA稳步拓展。欧洲市场持续投入。关税对冲:越南+东南亚储备。",
+      extra: "全链路数字化+AI Agent专项开发。核心产能仍国内(供给稳定性+品控+小单快反)。"
+    }]
+  },
+  {
+    id: "ruyuchen", name: "若羽臣", code: "003010.SZ", sector: "轻工", sub: "电商代运营+自有品牌",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月30日调研",
+      metrics: [
+        { label: "绽家", val: "香氛家清", trend: "up" },
+        { label: "斐萃", val: "女性抗衰", trend: "up" },
+        { label: "奥伦纳素", val: "高端护肤收购", trend: "up" },
+        { label: "IP联名", val: "HelloKitty/赫本", trend: "up" },
+        { label: "代言人", val: "成毅上半年", trend: "up" },
+        { label: "分红", val: "10派3元", trend: "up" },
+        { label: "618", val: "全面发力", trend: "neutral" },
+        { label: "矩阵号", val: "分散流量风险", trend: "neutral" }
+      ],
+      tags: ["电商代运营","绽家","斐萃","奥伦纳素"],
+      focus: "①绽家:香氛洗衣液/洗衣凝珠/内衣洗等明星品类;HelloKitty+赫本IP联名;成毅代言人上半年;洗手液/护手霜/空间香氛延展;②斐萃:NAD+/麦角硫因新品;矩阵号策略分散风险;③收购奥伦纳素布局高端护肤;④全年目标未调整,10派3元;⑤618全面发力",
+      highlights: "绽家香氛家清品类领先,IP联名+代言人矩阵。斐萃麦角硫因系列迭代。奥伦纳素收购补齐高端护肤。矩阵号分散流量风险。",
+      guidance: "全年目标按原计划推进。线上天猫/抖音/小红书/京东巩固领先;线下KA/新零售/会员店覆盖。矩阵直播间布局。",
+      extra: "绽家Hello Kitty联名1月上线,赫本系列香水油凝珠推出。奥伦纳素海外品牌+全球运营模式。"
+    }]
+  },
+  {
+    id: "onemore", name: "壹网壹创", code: "300792.SZ", sector: "轻工", sub: "电商代运营+AI Agent",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月29日线上交流",
+      metrics: [
+        { label: "26Q1营收", val: "2.13亿(-14.08%)", trend: "down" },
+        { label: "26Q1归母", val: "3139万(+20.74%)", trend: "up" },
+        { label: "26Q1扣非", val: "3041万(+20.27%)", trend: "up" },
+        { label: "毛利率", val: "32.54%(+3.90pct)", trend: "up" },
+        { label: "销售费用", val: "-28.66%", trend: "up" },
+        { label: "四大AI Agent", val: "云见/大师生图/数素投/客服", trend: "up" },
+        { label: "新增品牌", val: "瑞幸/碧缇丝/罗曼", trend: "up" },
+        { label: "联世并购", val: "推进中", trend: "up" },
+        { label: "GMV", val: "双位数增长", trend: "up" },
+        { label: "存货", val: "-12.32%", trend: "up" }
+      ],
+      tags: ["AI战略","代运营","四大Agent","联世并购"],
+      focus: "①26Q1营收2.13亿-14.08%(去年经销终止+新增磨合),归母3139万+20.74%;②毛利率32.54%+3.90pct(AI赋能+高毛利TP占比提升);③销售费用-28.66%(近三年最低);④四大AI Agent:云见/大师生图/数素投/AI客服商业化深化;⑤新增瑞幸/碧缇丝/罗曼星球;⑥联世传奇并购推进中;⑦GMV双位数增长",
+      highlights: "毛利率32.54%+3.90pct,销售费用-28.66%。四大AI Agent在多品牌使用。AI垂类收入快速增长(迪士尼/沃尔玛国际客户)。GMV双位数增长。",
+      guidance: "2026重心:AI垂类客户拓展,深化存量品牌AI应用,轻资产化,内容电商升级,联世并购。2025验证年→2026规模化年。GEO产品近期推出。",
+      extra: "新茶饮:霸王茶姬/瑞幸。科技类:脑机接口等。纯垂类AI:迪士尼/沃尔玛国际客户突破TP边界。阿里首批AI Agent共创服务商。"
+    }]
+  },
+  // ───── 轻工（新增） ─────
+  {
+    id: "guangbo", name: "广博股份", code: "002103.SZ", sector: "轻工", sub: "文具+潮玩卡牌+食玩",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月30日电话会议",
+      metrics: [
+        { label: "26Q1营收", val: "5.55亿(+14.55%)", trend: "up" },
+        { label: "26Q1净利", val: "2034万(-32%)", trend: "down" },
+        { label: "资产负债率", val: "36.66%(-11pct)", trend: "up" },
+        { label: "汇兑损失", val: "941万(+4067%)", trend: "down" },
+        { label: "研发投入", val: "748万(+43.84%)", trend: "neutral" },
+        { label: "新品类", val: "糖玩/膨化/饼干", trend: "up" },
+        { label: "IP合作", val: "芭比/PINGU/光阴之外", trend: "up" },
+        { label: "AI潮玩", val: "团队组建中", trend: "up" }
+      ],
+      tags: ["潮玩卡牌","IP联名","食玩新品","AI潮玩","东南亚出海"],
+      focus: "①26Q1营收5.55亿(+14.55%)，净利-32%（汇兑损失941万+研发投入+44%+股份支付）；②资产负债率36.66%（-11pct，财务状况改善）；③Q1新品：芭比/PINGU/巴巴爸爸联名食玩（糖玩/膨化/饼干三大品类），光阴之外/山海经密码收藏卡牌；④海外潮玩深耕东南亚市场；⑤AI潮玩研发团队组建中（智能交互类）；⑥三个FIZZ自营直播间（小红书/抖音/腾讯）",
+      highlights: "营收+14.55%增长。IP联名精准覆盖不同客群（芭比联名糖玩+盲盒赠品差异化）。卡牌矩阵丰富（国漫+日漫+影视三次元）。AI潮玩布局'IP+潮玩+科技'差异化竞争。东南亚本地化运营。",
+      guidance: "①持续深耕卡牌领域，挖掘优质IP资源；②加大潮玩AI产品研发（智能交互类）；③东南亚核心市场深耕+海外拓展；④线上直播+线下渠道协同发力",
+      extra: "汇兑损失为主观利润下降主因（财务费用+4067%）。员工持股计划股份支付381万。卡牌承接诛仙卡牌市场热度。"
+    }]
+  },
+  {
+    id: "zhongshun-jierou", name: "中顺洁柔", code: "002511.SZ", sector: "轻工", sub: "生活用纸龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度网上业绩说明会",
+      metrics: [
+        { label: "渠道融合", val: "全渠道+数字化", trend: "up" },
+        { label: "高端化", val: "持续深耕", trend: "up" },
+        { label: "个护品类", val: "培育投入期", trend: "neutral" },
+        { label: "外销区域", val: "东南亚+欧洲", trend: "up" },
+        { label: "现金流", val: "改善", trend: "up" },
+        { label: "下沉市场", val: "重要增长驱动力", trend: "up" },
+        { label: "AI数字化", val: "全链路转型", trend: "up" },
+        { label: "品牌维权", val: "阶段性成果", trend: "up" }
+      ],
+      tags: ["高端化","全渠道融合","下沉市场","个护拓展","AI数字化"],
+      focus: "①全渠道融合+数字化转型，线下从'广度覆盖'向'深度提质'转型；②高端化发展路线，提升高端/高毛利品类渗透率；③卫生巾/湿巾处于培育投入期（短期利润贡献有限）；④外销主要东南亚+欧洲；⑤现金流改善（销售回款优化+存货管控）；⑥下沉市场成为重要增长驱动力；⑦AI数字化赋能生产/供应链/管理",
+      highlights: "全渠道融合核心战略。高端品类渗透率提升。下沉市场覆盖全国大部分地县级城市。AI数字化模型监控生产耗用。品牌维权取得阶段性成果。珍稀泉矿泉水分阶段推进渠道布局。",
+      guidance: "①持续推进高端品类扩容+产品结构优化；②深化终端渗透+品牌心智建设；③个护业务逐步成长为新增长曲线；④产能投放有节奏推进产销平衡；⑤回购方案有效期内择机实施",
+      extra: "聚焦生活用纸核心主业。joybuy平台销售正常确认收入。季度营收无明显季节性特征。"
+    }]
+  },
+  {
+    id: "suofeiya", name: "索菲亚", code: "002572.SZ", sector: "轻工", sub: "定制家居龙头",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2026Q1业绩说明会",
+      metrics: [
+        { label: "26Q1营收", val: "23.30亿(-4.48%)", trend: "down" },
+        { label: "26Q1净利", val: "2.12亿(-10.88%)", trend: "down" },
+        { label: "整装渠道", val: "增长亮眼", trend: "up" },
+        { label: "大宗业务", val: "下降拖累", trend: "down" },
+        { label: "零售", val: "稳健", trend: "up" },
+        { label: "海外收入", val: "8471万(+46%)", trend: "up" },
+        { label: "海外地区", val: "20+国家", trend: "up" },
+        { label: "分红", val: "10派5元", trend: "up" }
+      ],
+      tags: ["定制家居","整装高增","出海加速","大家居"],
+      focus: "①26Q1营收23.30亿(-4.48%)，归母2.12亿(-10.88%)；②整装渠道增长亮眼，大宗业务下降为主要拖累，零售渠道稳健；③海外收入8471万(+46%)，覆盖20+国家地区；④大家居战略深化（衣柜/橱柜/木门/护墙/家电一体化）",
+      highlights: "整装渠道高增长验证大家居战略。海外收入+46%高增覆盖20+国家。零售渠道稳健。大宗业务下降收窄趋势。大家居战略深化（衣柜/橱柜/木门/护墙/家电一体化）。",
+      guidance: "①大家居战略深化推进；②海外业务持续拓展（20+国家覆盖）；③整装渠道继续发力；④大宗业务企稳回升",
+      extra: "定制家居行业受房地产低迷传导影响，需求端承压。索菲亚通过整装渠道和出海寻找增量。"
+    }]
+  },
+  {
+    id: "shangpin-zhaipei", name: "尚品宅配", code: "300616.SZ", sector: "轻工", sub: "定制家居+AI+3D打印",
+    records: [{
+      date: "2026-04", type: "调研", title: "2026年4月28日电话会议",
+      metrics: [
+        { label: "2025营收", val: "35.52亿", trend: "down" },
+        { label: "26Q1营收", val: "5.98亿", trend: "down" },
+        { label: "海外营收", val: "+21.62%", trend: "up" },
+        { label: "加盟模式", val: "同比增长", trend: "up" },
+        { label: "华南华中", val: "国补带动增长", trend: "up" },
+        { label: "AI平台", val: "多智能体迭代", trend: "up" },
+        { label: "3D打印", val: "入户应用突破", trend: "up" },
+        { label: "BIM整装", val: "稳健提质", trend: "up" }
+      ],
+      tags: ["AI多智能体","3D打印","门墙柜一体","海外+22%","BIM整装"],
+      focus: "①2025营收35.52亿，26Q1营收5.98亿（房地产低迷传导）；②海外区域营收+21.62%（Sunpina品牌）；③加盟模式同比增长（创新招商+'1+N'渠道模型）；④华南/华中营收同比增长（国补政策加持）；⑤AI多智能体平台迭代（数字孪生/三维物理空间映射）；⑥3D打印家居入户应用突破（无需开模小批量个性化）；⑦BIM整装大家居稳健提质",
+      highlights: "AI多智能体平台实现设计方案转三维物理空间数字孪生。3D打印家居从'选家居'到'造家居'。海外+21.62%增长。圣诞鸟整装升级。秒住房平台第三代甄选好房。内容电商赛道领跑。",
+      guidance: "2026关键词'远见驭新机 AI赢未来'：①坚守定制主业+多元场景；②数字技术卡位智能生态入口；③构建新型加盟关系+做强自营城市标杆；④优化组织管理+提升交付效率；⑤深耕存量客户价值；⑥AI/3D打印/适老家居三大赛道",
+      extra: "装配式干法施工+BIM技术精准管控。游学会精准招商。'1+N'渠道模型在自营城市落地。"
+    }]
+  },
+  {
+    id: "chuangyuan", name: "创源股份", code: "300703.SZ", sector: "轻工", sub: "文创+跨境电商+运动健康",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度网上业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "+10.55%", trend: "up" },
+        { label: "2025净利", val: "-31.86%", trend: "down" },
+        { label: "扣非净利", val: "-43.73%", trend: "down" },
+        { label: "跨境电商", val: "8.96亿(+43%)", trend: "up" },
+        { label: "运动健康", val: "7.27亿(+53%)", trend: "up" },
+        { label: "运动毛利率", val: "43.52%", trend: "up" },
+        { label: "海外占比", val: "~90%", trend: "neutral" },
+        { label: "员工持股考核", val: "营收+16%或净利+25%", trend: "up" },
+        { label: "越南产能", val: "已具备生产能力", trend: "up" },
+        { label: "AIGC", val: "浙江典型案例", trend: "up" }
+      ],
+      tags: ["运动健康+53%","跨境电商+43%","越南产能","AIGC应用","员工持股"],
+      focus: "①营收+10.55%（跨境电商+43%拉动），净利-32%（销售费用+7220万+汇兑收益减少4175万+管理费用+4369万）；②运动健康7.27亿(+53%)，毛利率43.52%，RITFIT自主品牌；③海外占比~90%（北美基本盘+欧洲/澳洲深耕）；④越南太平已具备生产能力；⑤员工持股考核：26年营收+16%或净利+25%；⑥AIGC入选浙江人工智能典型案例；⑦2025分红+回购总额占净利204%",
+      highlights: "运动健康板块毛利率43.52%成为核心增长引擎。跨境电商+43%高增。亚马逊+独立官网+线下体验店三位一体。德国子公司辐射欧洲。AIGC在产品设计+精准营销端应用。越南产能对冲关税风险。高分红回购占净利204%。",
+      guidance: "①26年业绩考核：营收+16%或净利+25%；②运动健康：品牌/渠道/产品/全球化四轮驱动；③深化越南产能+'国内双基地+东南亚产能'体系；④AIGC推进智能玩具/IP文创AI应用；⑤外汇套期保值平滑汇率波动",
+      extra: "对美出口以FOB交易为主（关税由美方承担）。智能玩具/IP文创为AIGC重点方向。"
+    }]
+  },
+  {
+    id: "zhiou", name: "致欧科技", code: "301376.SZ", sector: "轻工", sub: "跨境电商家居（欧美）",
+    records: [{
+      date: "2026-04", type: "业绩会", title: "2025年度及2026Q1业绩说明会",
+      metrics: [
+        { label: "2025营收", val: "~87亿(+7%)", trend: "up" },
+        { label: "2025净利", val: "3.35亿(+0.67%)", trend: "neutral" },
+        { label: "26Q1营收", val: "23亿(+10.7%)", trend: "up" },
+        { label: "26Q1净利", val: "7518万(-32%)", trend: "down" },
+        { label: "汇兑损失", val: "~5000万", trend: "down" },
+        { label: "欧洲增长", val: "超预期", trend: "up" },
+        { label: "VC占比", val: "提升", trend: "up" },
+        { label: "新品占比", val: "~20%", trend: "up" },
+        { label: "AI应用", val: "Listing/广告/客服", trend: "up" },
+        { label: "KA渠道", val: "Target/XXXLutz突破", trend: "up" },
+        { label: "拉美市场", val: "墨西哥/巴西", trend: "up" },
+        { label: "美国六仓", val: "完成布局", trend: "up" }
+      ],
+      tags: ["跨境电商","VC模式","AI赋能","供应链双中心","欧美家居"],
+      focus: "①2025营收~87亿(+7%)，净利+0.67%（关税影响）；②26Q1营收+10.7%，净利-32%（汇兑损失5000万拖累，剔除后利润率提升）；③欧洲超预期增长，美国下半年恢复性增长；④VC模式大幅推进（美线7成/欧线过半通过VC经营）；⑤新品占比~20%（铁床/板式家具/收纳类扩展）；⑥AI三大应用：Listing全AI出图/广告AI托管/客服30%+AI回复；⑦'中国+N'双供应中心（中国+东南亚）",
+      highlights: "剔除汇兑后利润率提升。欧洲市场延续强劲势头。VC模式大幅推进获得成本结构优势。AI全链路应用（Listing/广告/客服/管理）。美国六仓布局完成，FedEx账号第一梯队。海运费年约好于去年。KA渠道突破（Target/Hobby Lobby/XXXLutz）。对等关税取消10%直接受益。退税申请已提交。",
+      guidance: "①美国市场高速恢复性增长（东南亚供应链稳定+新品加速）；②欧洲延续强劲势头；③拉美（墨西哥/巴西）高增长（美客多战略支持+亚马逊优惠）；④新品驱动（占比~20%）；⑤AI自研广告管理工具上线；⑥VC占比持续提升",
+      extra: "欧美家居家具市场容量大（90亿体量占比较小）。消费降级趋势契合性价比定位。合规运营+差异化竞争优势。中小卖家出清（海关查验+税务数据交换）。股权激励再发信心。"
+    }]
+  }];
+
+// ═══════════════════ 行业总结 ═══════════════════════
+const sectorSummaries = {
+  "黄金珠宝": {
+    situation: "金价高位震荡，周大福2026年3月关店1600-1700家优化渠道，克重产品占60%。六福反馈行业金价承压、一二线城市集中化。周大生转型中保持一线阵营。老凤祥11月上调金价6-7%已传导。周六福覆盖31省319市。",
+    focus: "①金价高位下终端动销韧性；②克重vs一口价产品结构变化；③渠道优化与店效提升；④国潮文化金创新",
+    catalyst: "①金价回调后消费释放；②中秋国庆/春节婚庆旺季；③渠道整合与品牌并购；④珠宝品牌出海"
+  },
+  "家电": {
+    situation: "美的集团2025营收4160亿+、归母400亿+，研发投入178亿(+9.6%)，ToB占比26.8%，AI投入3年600亿，东芝日本6品类市占16%+。石头科技2025营收186.95亿+56.51%，全球清洁机器人17.7%市占第一。苏泊尔26Q1营收58.82亿+1.65%，抖音拼多多增速快。德尔玛2025营收34.32亿，双品牌海外布局。三花智控2025营收310.12亿+10.97%，归母40.63亿+31.10%，毛利率28.78%创历史新高，NEV热管理6375万套。",
+    focus: "①家电巨头ToC+ToB增长接力；②扫地机器人全球市占及洗地机出海；③小家电渠道结构变化（抖音/拼多多增速）；④汽车热管理NEV渗透率及集成模块",
+    catalyst: "①AI/具身智能落地（人形机器人2026门店亮相）；②扫地机器人新品发布；③NEV热管理订单放量；④海外关税政策变化应对"
+  },
+  "纺服": {
+    situation: "安踏26Q1流水：安踏大货线下中单位数/FILA高单位数。李宁Q1流水中高单位数、折扣低单位数加深。Nike Q3营收持平、毛利率40.2%(-130bps)。特步Q1主品牌低单位数增长、索康尼20%+。申洲2025销售+8.1%。比音勒芬毛利率~75%。赢家2025收入~63亿(-<5%)、毛利率稳定略升。鲁泰A26Q1收入-6.69%、净利-36%但环比改善。华孚2025收入80.5亿(-25.2%)、纱线订单扭亏。雅戈尔25收入-26亿、时尚利润-3.4亿。金陵体育2025利润翻倍（赛事运营爆发+投资收益），合计派息2824万占净利46%，FIBA官方认证。",
+    focus: "①运动品牌流水增速及折扣率变化；②纺织制造订单恢复节奏与关税影响；③女装品牌收入修复；④功能性面料/高端服饰需求；⑤体育器材+赛事运营增长",
+    catalyst: "①运动品牌季节营销；②纺织订单Q2-Q3旺季；③消费刺激政策；④出海并购整合；⑤大型赛事催化"
+  },
+  "食品饮料": {
+    situation: "乳制品：伊利液奶361亿、奶粉166亿(+14%)；光明乳业2025亏损（新莱特生产问题已基本解决）；妙可蓝多26Q1营收+30%+。白酒：茅台/五粮液2025年核心策略落地（消费者为中心/一商一策）；水井坊25年收入下滑40%；泸州老窖高档>中档>低档受影响排序；金徽酒26Q1营收10.92亿(-1.46%)。休闲零食：盐津铺子26Q1营收15.83亿、归母+29.48%；三只松鼠26Q1营收38.35亿、扣非+51.59%；劲仔26Q1营收7.39亿+24.16%；甘源Q1各渠道协同发力；西麦26Q1营收8.24亿+25.65%、归母+85.86%。烘焙：立高2025营收43.54亿+13.51%、UHT奶油8.5亿+。保健品：汤臣倍健Q1线上双位数增长、抖音占主品牌线上10%。调味品/啤酒/动保：海天产能稳定；惠泉2025净利7999万；百润Q1恢复增长。圣农26Q1净利2.53亿+71.41%。",
+    focus: "①白酒动销及库存健康度（次高端承压明显）；②休闲零食渠道变革及利润率提升（三只松鼠扣非+51%）；③乳制品原奶价格触底修复；④烘焙/保健品线上渠道增长",
+    catalyst: "①中秋国庆白酒旺季；②休闲零食618/双11；③乳制品原奶价格触底；④餐饮渠道恢复"
+  },
+  "农业": {
+    situation: "生猪养殖：牧原26Q1营收298.94亿、归母-12.15亿（猪价底部承压），商品猪1836.2万头。神农2025营收53.52亿、归母3.39亿。巨星2025营收80亿+31.62%、归母0.30亿。饲料：海大2025饲料销量3208万吨+21%、26Q1营收290.1亿+13.19%；粤海26Q1销量18.9万吨+61%。宠物食品：乖宝2025收入67.7亿+29%、自有品牌占比73%；中宠2025营收55.21亿+16.95%；佩蒂2025受海外冲击、2026重回增长。宠物用品：天元宠物2025营收30亿(+8.61%)、扣非净利+53%，并购淘通科技（电商服务商）推进中，越南笼具项目建设中。动保：金河2025营收28.78亿+21.41%，26Q1营收7.42亿+18.67%；瑞普26Q1扣非9547万+2.15%（剔除增值税+30%+）。种业：荃银高科2025亏损超2亿（减值+行业同质化），57个新品种审定。天然提取：晨光生物核心产品世界前列。温氏2025累计分红33.1亿（占归母63%），猪价预计下半年好于上半年。",
+    focus: "①猪价拐点及养殖板块亏损修复；②饲料销量增长及海外扩张；③宠物食品+宠物用品自有品牌占比提升；④转基因种业商业化推广及动保增值税影响；⑤天元宠物并购淘通科技进展",
+    catalyst: "①猪价季节性回升（Q3-Q4）；②饲料出口东南亚；③宠物食品/用品618/双11；④转基因品种审定；⑤天元并购淘通恢复审核"
+  },
+  "美护": {
+    situation: "科思传统防晒毛利20%+触底、新型防晒毛利30%。康耐特2025收入21.86亿+6.1%、自有品牌+12%。倍加洁AKK产能40吨/年。博士眼镜225家门店、智能眼镜160+专柜布局、毛利率61.71%→60.57%。登康口腔2025毛利率持续改善（产品结构升级驱动），电商增速22.33%、占比34.26%，高分红80.82%，线下行业前三地位稳固。",
+    focus: "①防晒剂价格触底反弹；②智能眼镜渠道扩张；③口腔护理高端化+电商增长；④AKK益生菌商业化进展",
+    catalyst: "①防晒旺季Q2-Q3；②智能眼镜新品上市；③口腔护理下沉+高端新品；④功能性护肤渗透率提升"
+  },
+  "轻工": {
+    situation: "特种纸：五洲特纸2025营收88.84亿+16%、销量220万吨。太阳纸业25资本开支70-80亿、浆自给率60%+。家居：梦百合2025营收64.74亿、毛利率26.03%；箭牌营收64.74亿；索菲亚26Q1营收23.30亿(-4.48%)，整装渠道增长亮眼，海外+46%覆盖20+国家；尚品宅配2025营收35.52亿，AI多智能体迭代+3D打印家居突破，海外+21.62%。跨境电商：赛维时代26Q1服饰增速回升，非服饰库存8.25亿→2.93亿（亏损大幅收窄），Walmart线下首批订单落地；致欧科技2025营收~87亿(+7%)，26Q1营收+10.7%，VC模式大幅推进，AI全链路应用，美国六仓完成。电商代运营：若羽臣绽家香氛家清+斐萃女性抗衰+奥伦纳素高端护肤；壹网壹创26Q1营收2.13亿(-14.08%)、归母3139万+20.74%、毛利率32.54%+3.90pct、AI四大Agent商业化深化。文创/潮玩：广博股份26Q1营收+14.55%，IP联名食玩+收藏卡牌新品，AI潮玩布局中；创源股份运动健康+53%（毛利率43.52%），跨境电商+43%，越南产能就绪。纸业：中顺洁柔全渠道融合+高端化推进，个护品类培育中，外销东南亚+欧洲。太阳纸业26年资本开支<50亿。",
+    focus: "①跨境电商服饰增速修复及非服饰亏损收窄；②电商代运营AI赋能毛利率提升；③浆纸成本端改善；④家居建材地产影响；⑤文创/潮玩IP创新+AI潮玩；⑥生活用纸高端化+个护拓展",
+    catalyst: "①跨境电商旺季及关税政策；②AI Agent垂类客户拓展；③纸品提价；④地产政策放松；⑤IP联名新品上市；⑥运动健康板块高增"
+  },
+  "酒店旅游": {
+    situation: "华住2026上半年RevPAR增速快、下半年ADR驱动。红旗连锁门店优化、红旗优选SKU100个、24小时门店运营。三峡旅游2025净利-46%（补缴税款+景区减值），观光游轮客单价提升，省际游轮首批两艘筹备中（五大特色），巅峰双峡项目推进，累计分红5.08亿，拟注销1892万股回购股份。",
+    focus: "①酒店RevPAR及ADR修复；②便利店同店增长；③连锁化率提升；④即时零售拓展；⑤省际游轮投入运营及外延扩张",
+    catalyst: "①暑期/国庆旅游旺季；②酒店新品类推出；③便利店即时零售；④出行需求释放；⑤三峡游轮新产品上线"
+  },
+  "户外装备": {
+    situation: "乐欣户外2025收入6.62亿+15.5%、毛利额+22%，OBM+ODM双轮驱动。行业处于成长期，渗透率提升空间大。",
+    focus: "①ODM订单稳定性；②自有品牌出海；③垂钓市场全球增长；④汇率波动",
+    catalyst: "①海外展会新品；②垂钓赛事；③东南亚/南美拓展；④跨境电商扩张"
+  },
+  "餐饮": {
+    situation: "巴比食品2025营收18.59亿+11.2%、归母2.73亿。百胜中国26-28系统销售中高单位数CAGR、SSSG+0-2%、26E门店2万家。沪上阿姨Q3 GMV月均30%+、同店20%+、Q3新开门店1000家。",
+    focus: "①餐饮连锁化率提升；②单店模型优化；③加盟模式盈利水平；④外卖渠道利润率",
+    catalyst: "①暑期/国庆旺季；②新品上市；③加盟政策优化；④即时零售/外卖创新"
+  }
+};
+
+// 每个公司的记录按日期倒序排列（最新在前）
+companies.forEach(c => { if (c.records) c.records.sort((a, b) => b.date.localeCompare(a.date)); });
+
+// ═══════════════════════════════════════
+let state = {
+  currentView: 'overview',
+  currentSector: 'all',
+  currentSearch: '',
+  selectedCompany: companies[0],
+  compareIds: ['laopu', 'anta', 'zhoudafu'],
+};
+
+function sectorShort(s) { return {"黄金珠宝":"黄金珠宝", "家电":"家电", "纺服":"纺服", "食品饮料":"食品饮料", "农业":"农业", "美护":"美护", "轻工":"轻工", "酒店旅游":"酒店旅游", "户外装备":"户外装备", "餐饮":"餐饮"}[s] || "其他"; }
+
+function filteredCompanies() {
+  return companies.filter(c => {
+    const sectorOk = state.currentSector === 'all' || c.sector === state.currentSector;
+    const searchOk = !state.currentSearch ||
+      c.name.includes(state.currentSearch) || c.code.toLowerCase().includes(state.currentSearch.toLowerCase()) ||
+      c.sub.includes(state.currentSearch) ||
+      c.records.some(r => r.tags.some(t => t.includes(state.currentSearch)) || r.focus.includes(state.currentSearch) || r.highlights.includes(state.currentSearch));
+    return sectorOk && searchOk;
+  });
+}
+
+function renderSidebar() {
+  const list = document.getElementById('sidebarList');
+  const fcs = filteredCompanies();
+  list.innerHTML = fcs.map(c => {
+    const active = state.selectedCompany && state.selectedCompany.id === c.id ? 'active' : '';
+    const dotCls = 'dot-' + sectorShort(c.sector);
+    const recCount = c.records.length;
+    return `<div class="sidebar-item ${active}" onclick="selectCompany('${c.id}')">
+      <span class="si-dot ${dotCls}"></span>
+      <div class="si-info">
+        <div class="si-name">${c.name}</div>
+        <div class="si-sub">${c.sub}</div>
+      </div>
+      <span class="si-count">${recCount}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('total-badge').textContent = fcs.length + '家公司';
+}
+
+function renderContent() {
+  const area = document.getElementById('contentArea');
+  if (state.currentView === 'detail') renderDetailView(area);
+  else if (state.currentView === 'overview') renderOverview(area);
+  else if (state.currentView === 'compare') renderCompare(area);
+}
+
+function renderDetailView(area) {
+  const c = state.selectedCompany;
+  if (!c) { area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">请从左侧选择一家公司</div>'; return; }
+  const sKey = sectorShort(c.sector);
+  const latestRec = c.records[0];
+  const m = latestRec.metrics;
+  const groups = [
+    { title: "最新报告期", items: m.slice(0,4) },
+    { title: "关键指标", items: m.slice(4,8) },
+    { title: "其他", items: [m[8]] }
+  ];
+  const metricsHtml = `<div class="dh-metrics-wrap">${
+    groups.map(g => `
+      <div class="dh-group">
+        <div class="dh-group-title">${g.title}</div>
+        <div class="dh-group-cells">${
+          g.items.map(mi => `<div class="dh-metric"><div class="val ${mi ? mi.trend : 'neutral'}">${mi ? mi.val : '—'}</div><div class="lbl">${mi ? mi.label : ''}</div></div>`).join('')
+        }</div>
+      </div>`).join('')
+  }</div>`;
+
+  const timelineHtml = c.records.map(r => {
+    const tagsHtml = r.tags.map((t, i) => `<span class="tl-tag ${i < 2 ? 'hot' : 'up'}">${t}</span>`).join('');
+    return `<div class="tl-item">
+      <div class="tl-dot type-${r.type}"></div>
+      <div class="tl-header">
+        <span class="tl-date">${r.date}</span>
+        <span class="tl-type type-tag-${r.type}">${r.type}</span>
+        <span style="font-size:.8rem;font-weight:600;color:var(--text)">${r.title}</span>
+      </div>
+      <div class="tl-card">
+        <div class="tl-tags">${tagsHtml}</div>
+        <div class="tl-section"><div class="tl-section-title">📌 市场关注点</div><div class="tl-section-content">${r.focus}</div></div>
+        <div class="tl-section"><div class="tl-section-title">📊 核心亮点</div><div class="tl-section-content">${r.highlights}</div></div>
+        <div class="tl-section"><div class="tl-section-title">🎯 公司指引 & 展望</div><div class="tl-section-content">${r.guidance}</div></div>
+        <div class="tl-section"><div class="tl-section-title">💡 深度背景</div><div class="tl-section-content">${r.extra}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="detail-view active">
+    <div class="detail-header">
+      <div class="dh-row1">
+        <div>
+          <span class="dh-name">${c.name}</span><span class="dh-code">${c.code}</span>
+        </div>
+        <span class="dh-sector sector-${sKey}">${c.sector}</span>
+      </div>
+      <div class="dh-sub">${c.sub}</div>
+      ${metricsHtml}
+    </div>
+    <div class="timeline">
+      <div class="timeline-title">跟踪记录（${c.records.length} 条）</div>
+      ${timelineHtml}
+    </div>
+  </div>`;
+}
+
+function renderOverview(area) {
+  const fcs = filteredCompanies();
+  // 按板块分组
+  const sectorOrder = ["黄金珠宝","家电","纺服","食品饮料","农业","美护","轻工","酒店旅游","户外装备","餐饮"];
+  const grouped = {};
+  fcs.forEach(c => {
+    const s = c.sector;
+    if (!grouped[s]) grouped[s] = [];
+    grouped[s].push(c);
+  });
+  let html = '';
+  sectorOrder.forEach(sector => {
+    const cs = grouped[sector];
+    if (!cs || cs.length === 0) return;
+    const sm = sectorSummaries[sector];
+    // 行业总结卡片
+    if (sm) {
+      html += `<div class="sector-summary">
+        <div class="ss-header"><span class="ss-title">${sector} · 行业概览</span></div>
+        <div class="ss-body">
+          <div class="ss-section"><span class="ss-label">行业情况</span><p>${sm.situation}</p></div>
+          <div class="ss-section"><span class="ss-label">市场关注</span><p>${sm.focus}</p></div>
+          <div class="ss-section"><span class="ss-label">催化关注</span><p>${sm.catalyst}</p></div>
+        </div>
+      </div>`;
+    }
+    // 公司卡片
+    const cards = cs.map(c => {
+      const sKey = sectorShort(c.sector);
+      const latest = c.records[0];
+      const keyMetrics = [
+        latest.metrics[0], latest.metrics[1],
+        latest.metrics[4], latest.metrics[5],
+      ].filter(Boolean);
+      const metricsHtml = keyMetrics.map(m => `
+        <div class="ocard-metric"><div class="val ${m.trend}">${m.val}</div><div class="lbl">${m.label}</div></div>`).join('');
+      const tagsHtml = latest.tags.map((t, i) => `<span class="ocard-tag ${i < 2 ? 'hot' : 'up'}">${t}</span>`).join('');
+      const recInfo = c.records.length > 1
+        ? `<span class="ocard-latest">最新：${latest.title}（${latest.date}） · 共 <strong>${c.records.length}</strong> 条记录</span>`
+        : `<span class="ocard-latest">最新：${latest.title}（${latest.date}）</span>`;
+      return `<div class="ocard" data-sector="${c.sector}" onclick="selectCompany('${c.id}');switchView('detail',document.querySelector('.view-btn'))">
+        <div class="ocard-header">
+          <div><span class="ocard-name">${c.name}</span><span class="ocard-code">${c.code}</span><div class="ocard-sub">${c.sub}</div></div>
+          <span class="dh-sector sector-${sKey}">${c.sector}</span>
+        </div>
+        <div class="ocard-metrics">${metricsHtml}</div>
+        <div class="ocard-tags">${tagsHtml}</div>
+        ${recInfo}
+      </div>`;
+    }).join('');
+    html += cards;
+  });
+
+  area.innerHTML = `<div class="overview-view active">
+    <div class="overview-title">共 ${fcs.length} 家公司 · 点击卡片查看详情</div>
+    <div class="grid">${html}</div>
+  </div>`;
+}
+
+function renderCompare(area) {
+  const selectsHtml = state.compareIds.map((id, i) =>
+    `<select class="compare-select" onchange="updateCompare(${i}, this.value)">${companies.map(c => `<option value="${c.id}" ${c.id === id ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`
+  ).join('');
+  const addBtn = state.compareIds.length < 6 ? `<button class="compare-add-btn" onclick="addCompare()">+ 添加公司</button>` : '';
+
+  const compCompanies = state.compareIds.map(id => companies.find(c => c.id === id)).filter(Boolean);
+  const rows = [
+    { label: "板块", fn: c => c.sector },
+    { label: "细分领域", fn: c => c.sub },
+    { label: "最新报告期", fn: c => c.records[0] ? c.records[0].date + ' ' + c.records[0].title : '-' },
+    { label: "核心指标", fn: c => {
+        const m = c.records[0] ? c.records[0].metrics : [];
+        return m.map(mi => `<span style="color:${mi.trend==='up'?'var(--up)':mi.trend==='down'?'var(--down)':'#aaa'}">${mi.label}: <b>${mi.val}</b></span>`).join('<br>') || '—';
+      }
+    },
+    { label: "关键标签", fn: c => c.records[0] ? c.records[0].tags.map(t => `<span class="ocard-tag hot" style="margin:1px">${t}</span>`).join(' ') : '-' },
+    { label: "市场关注点", fn: c => c.records[0] ? c.records[0].focus : '-' },
+    { label: "核心亮点", fn: c => c.records[0] ? c.records[0].highlights : '-' },
+  ];
+  const thHtml = '<th>维度</th>' + compCompanies.map(c => `<th>${c.name}<br><span style="font-weight:400;font-size:.7rem">${c.code}</span></th>`).join('');
+  const tbHtml = rows.map(r => `<tr><td class="row-label">${r.label}</td>${compCompanies.map(c => `<td>${r.fn(c)}</td>`).join('')}</tr>`).join('');
+
+  area.innerHTML = `<div class="compare-view active">
+    <div class="compare-header">
+      <h2>消费行业横向对比</h2>
+      <div class="compare-selects">${selectsHtml}${addBtn}</div>
+    </div>
+    <div class="compare-table-wrap">
+      <table class="compare-table"><thead><tr>${thHtml}</tr></thead><tbody>${tbHtml}</tbody></table>
+    </div>
+  </div>`;
+}
+
+function selectCompany(id) {
+  state.selectedCompany = companies.find(c => c.id === id);
+  state.currentView = 'detail';
+
+// Error handling for debugging
+window.addEventListener('error', function(e) {
+  console.error('Global error:', e.message);
+  document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
+});
+renderSidebar();
+renderContent();
+  // Update view buttons to reflect switch
+  document.querySelectorAll('.view-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.textContent.includes('详情')) b.classList.add('active');
+  });
+}
+
+function switchView(view, btn) {
+  state.currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else document.querySelectorAll('.view-btn').forEach(b => { if (b.textContent.includes(view === 'detail' ? '详情' : view === 'overview' ? '总览' : '对比')) b.classList.add('active'); });
+  renderContent();
+}
+
+function filterSector(sector, btn) {
+  state.currentSector = sector;
+  document.querySelectorAll('.sf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+// Error handling for debugging
+window.addEventListener('error', function(e) {
+  console.error('Global error:', e.message);
+  document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
+});
+renderSidebar();
+  if (state.currentView !== 'detail') renderContent();
+}
+
+function onSearch() {
+  state.currentSearch = document.getElementById('searchInput').value.trim();
+  
+// Error handling for debugging
+window.addEventListener('error', function(e) {
+  console.error('Global error:', e.message);
+  document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
+});
+renderSidebar();
+  if (state.currentView !== 'detail') renderContent();
+}
+
+function updateCompare(idx, val) {
+  state.compareIds[idx] = val;
+  renderContent();
+}
+
+function addCompare() {
+  const unused = companies.find(c => !state.compareIds.includes(c.id));
+  if (unused) { state.compareIds.push(unused.id); renderContent(); }
+}
+
+
+// Error handling for debugging
+window.addEventListener('error', function(e) {
+  console.error('Global error:', e.message);
+  document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
+});
+renderSidebar();
+renderContent();
+</script>
+</body>
+</html>
