@@ -329,16 +329,51 @@
     .search-input { width: 160px; }
   }
 
-  /* ── 手机适配 ── */
+  /* ── 手机适配：顶部栏双行 + 抽屉侧边栏 ── */
   @media (max-width: 768px) {
     .hamburger { display: flex; }
-    .topbar { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
-    .topbar-left { gap: 10px; }
-    .topbar h1 { font-size: 0.95rem; }
-    .topbar-right { width: 100%; justify-content: flex-end; gap: 8px; }
-    .search-input { width: 120px; font-size: 0.75rem; padding: 5px 10px; }
-    .view-toggle { gap: 2px; }
-    .view-btn { padding: 4px 8px; font-size: 0.7rem; }
+    .topbar {
+      padding: 8px 12px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .topbar-left {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      min-width: 0;
+    }
+    .topbar h1 {
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+    .topbar .badge {
+      flex-shrink: 0;
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .topbar-right {
+      width: 100%;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      width: unset;
+      font-size: 0.78rem;
+      padding: 7px 12px;
+    }
+    .view-toggle { gap: 3px; flex-shrink: 0; }
+    .view-btn { padding: 6px 10px; font-size: 0.72rem; white-space: nowrap; }
 
     /* 侧边栏 → 抽屉 */
     .sidebar {
@@ -395,9 +430,8 @@
 
   /* ── 小屏手机 ── */
   @media (max-width: 400px) {
-    .topbar h1 { font-size: 0.85rem; }
-    .search-input { width: 100px; }
-    .view-btn { padding: 3px 6px; font-size: 0.65rem; }
+    .topbar h1 { font-size: 0.9rem; }
+    .view-btn { padding: 5px 7px; font-size: 0.68rem; }
     .dh-name { font-size: 1rem; }
     .dh-metric { padding: 7px 5px; }
     .dh-metric .val { font-size: 0.8rem; }
