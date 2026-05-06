@@ -300,15 +300,6 @@
     border-top: 1px solid var(--border); background: var(--bg-light); flex-shrink: 0;
   }
 
-  @media (max-width: 800px) {
-    .sidebar { width: 200px; }
-    .grid { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 600px) {
-    .main-wrap { flex-direction: column; }
-    .sidebar { width: 100%; max-height: 200px; border-right: none; border-bottom: 1px solid var(--border); }
-  }
-
   .sidebar-list::-webkit-scrollbar, .content::-webkit-scrollbar { width: 5px; }
   .sidebar-list::-webkit-scrollbar-thumb, .content::-webkit-scrollbar-thumb { background: #c5d8ea; border-radius: 99px; }
 
@@ -329,8 +320,9 @@
 
   /* ── 手机适配：无侧边栏 + 行业横滑条 + 公司下拉 ── */
   @media (max-width: 768px) {
-    .hamburger { display: none !important; }
-    .sidebar, .sidebar-overlay { display: none !important; }
+    .sidebar { width: 0 !important; min-width: 0 !important; overflow: hidden !important; border: none !important; }
+    .sidebar * { display: none !important; }
+    .sidebar-overlay { display: none !important; }
     .main-wrap { flex-direction: column; }
     .content { padding: 0; }
 
