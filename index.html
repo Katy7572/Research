@@ -318,57 +318,75 @@
     .grid { grid-template-columns: 1fr; }
   }
 
-  /* ── 手机适配：无侧边栏 + 行业横滑条 + 公司下拉 ── */
+  /* ── 手机适配 ── */
   @media (max-width: 768px) {
-    .sidebar { width: 0 !important; min-width: 0 !important; overflow: hidden !important; border: none !important; }
-    .sidebar * { display: none !important; }
-    .sidebar-overlay { display: none !important; }
+    .sidebar, .sidebar-overlay { display: none !important; }
     .main-wrap { flex-direction: column; }
     .content { padding: 0; }
 
-    /* 顶部栏单行紧凑 */
-    .topbar { padding: 8px 10px; }
+    /* 顶部栏：标题 + 徽章 单行 */
+    .topbar { padding: 10px 12px; }
     .topbar-left { gap: 8px; }
-    .topbar h1 { font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-    .topbar .badge { font-size: 0.62rem; padding: 2px 6px; white-space: nowrap; flex-shrink: 0; }
-    .topbar-right { gap: 6px; }
-    .search-input { flex: 1; min-width: 0; width: unset; font-size: 0.75rem; padding: 6px 10px; }
-    .view-toggle { gap: 2px; flex-shrink: 0; }
-    .view-btn { padding: 5px 8px; font-size: 0.68rem; white-space: nowrap; }
+    .topbar h1 { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .topbar .badge { font-size: 0.65rem; padding: 2px 8px; white-space: nowrap; flex-shrink: 0; }
+    .topbar-right { display: none; }
 
-    /* 行业横滑条 */
-    .mobile-sector-bar {
-      display: flex !important;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      gap: 6px;
-      padding: 8px 10px;
-      background: var(--bg-light);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 60;
+    /* 行业卡片网格（首页） */
+    .mobile-home { display: block; padding: 12px; }
+    .mh-title { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; }
+    .mh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mh-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; cursor: pointer; position: relative; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,55,120,.06);
     }
-    .mobile-sector-bar::-webkit-scrollbar { display: none; }
-    .ms-btn {
-      flex-shrink: 0;
-      padding: 5px 14px;
-      border-radius: 99px;
-      font-size: 0.72rem;
-      font-weight: 500;
-      background: #fff;
-      border: 1px solid var(--soft-border);
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
+    .mh-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--navy); border-radius: 12px 12px 0 0;
+    }
+    .mh-card-name { font-size: 0.92rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .mh-card-sub { font-size: 0.68rem; color: var(--text-muted); line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .mh-card-count { font-size: 0.65rem; color: #fff; background: var(--navy); border-radius: 99px;
+      padding: 2px 8px; margin-top: 8px; display: inline-block; }
+
+    /* 行业详情页 */
+    .mobile-sector-view { display: none; }
+    .mobile-sector-view.active { display: block; }
+
+    /* 行业页返回按钮 */
+    .mobile-back-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.78rem; color: var(--navy); cursor: pointer;
+      padding: 8px 12px; background: none; border: none;
       font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
     }
-    .ms-btn.active {
-      background: var(--navy);
-      border-color: var(--navy);
-      color: #fff;
+    .mobile-back-btn::before { content: '←'; font-size: 1rem; }
+
+    /* 搜索栏（内容区顶部） */
+    .mobile-search-bar {
+      padding: 8px 12px; background: var(--bg-light);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
     }
+    .mobile-search-bar input {
+      flex: 1; padding: 7px 12px; border-radius: 8px;
+      border: 1px solid var(--soft-border); font-size: 0.78rem;
+      background: #fff; outline: none;
+      font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+    }
+
+    /* 行业页标题 */
+    .mobile-sector-title {
+      padding: 14px 12px 6px; font-size: 1.05rem; font-weight: 700; color: var(--navy);
+    }
+
+    .detail-header { padding: 14px 12px 12px; position: static; }
+    .dh-row1 { flex-wrap: wrap; gap: 6px; }
+    .dh-name { font-size: 1.1rem; }
+    .dh-metrics-wrap { flex-direction: column; }
+    .dh-group { border-right: none !important; border-bottom: 1px solid var(--soft-border); }
+    .dh-group:last-child { border-bottom: none; }
 
     /* 详情页公司下拉 */
     .mobile-company-select {
@@ -383,13 +401,6 @@
       font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
       margin-bottom: 12px;
     }
-
-    .detail-header { padding: 14px 12px 12px; position: static; }
-    .dh-row1 { flex-wrap: wrap; gap: 6px; }
-    .dh-name { font-size: 1.1rem; }
-    .dh-metrics-wrap { flex-direction: column; }
-    .dh-group { border-right: none !important; border-bottom: 1px solid var(--soft-border); }
-    .dh-group:last-child { border-bottom: none; }
 
     .timeline { padding: 14px 12px 30px; }
     .timeline-title { font-size: 0.7rem; margin-bottom: 10px; }
@@ -470,9 +481,7 @@
     <div class="sidebar-list" id="sidebarList"></div>
   </div>
 
-  <div class="content" id="contentArea">
-    <div class="mobile-sector-bar" id="mobileSectorBar" style="display:none;"></div>
-  </div>
+  <div class="content" id="contentArea"></div>
 </div>
 
 <footer>数据来源于各公司公开调研纪要及业绩说明会，仅供研究参考，不构成投资建议。</footer>
@@ -3093,6 +3102,7 @@ function renderSidebar() {
 }
 
 function renderContent() {
+  if (window.innerWidth <= 768) { renderMobileContent(); return; }
   const area = document.getElementById('contentArea');
   if (state.currentView === 'detail') renderDetailView(area);
   else if (state.currentView === 'overview') renderOverview(area);
@@ -3262,7 +3272,12 @@ function selectCompany(id) {
   state.selectedCompany = companies.find(c => c.id === id);
   state.currentView = 'detail';
   renderSidebar();
-  renderContent();
+  if (window.innerWidth <= 768) {
+    mobileState.mobileView = 'detail';
+    renderMobileContent();
+  } else {
+    renderContent();
+  }
   document.querySelectorAll('.view-btn').forEach(b => {
     b.classList.remove('active');
     if (b.textContent.includes('详情')) b.classList.add('active');
@@ -3274,7 +3289,6 @@ function switchView(view, btn) {
   document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   else document.querySelectorAll('.view-btn').forEach(b => { if (b.textContent.includes(view === 'detail' ? '详情' : view === 'overview' ? '总览' : '对比')) b.classList.add('active'); });
-  renderMobileSectorBar();
   renderContent();
 }
 
@@ -3282,31 +3296,8 @@ function filterSector(sector, btn) {
   state.currentSector = sector;
   document.querySelectorAll('.sf-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderMobileSectorBar();
   renderSidebar();
   if (state.currentView !== 'detail') renderContent();
-}
-
-function renderMobileSectorBar() {
-  const bar = document.getElementById('mobileSectorBar');
-  if (!bar) return;
-  bar.style.display = '';
-  const sectors = ['全部', '黄金珠宝', '家电', '纺服', '食品饮料', '农业', '美护', '轻工', '酒店旅游', '户外装备', '餐饮'];
-  bar.innerHTML = sectors.map(s =>
-    `<button class="ms-btn ${state.currentSector === (s === '全部' ? 'all' : s) ? 'active' : ''}" onclick="filterSectorMobile('${s === '全部' ? 'all' : s}',this)">${s}</button>`
-  ).join('');
-}
-
-function filterSectorMobile(sector, btn) {
-  state.currentSector = sector;
-  document.querySelectorAll('.sf-btn').forEach(b => {
-    const s = b.textContent === '全部' ? 'all' : b.textContent;
-    b.classList.toggle('active', s === sector);
-  });
-  document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderSidebar();
-  renderContent();
 }
 
 function onSearch() {
@@ -3325,6 +3316,161 @@ function addCompare() {
   if (unused) { state.compareIds.push(unused.id); renderContent(); }
 }
 
+/* ===== 手机端：首页 → 行业页 → 详情页 ===== */
+const mobileState = { mobileView: 'home', mobileSector: null };
+
+function renderMobileContent() {
+  const area = document.getElementById('contentArea');
+  if (window.innerWidth > 768) { renderContent(); return; }
+  if (mobileState.mobileView === 'home') renderMobileHome(area);
+  else if (mobileState.mobileView === 'sector') renderMobileSector(area);
+  else if (mobileState.mobileView === 'detail') renderMobileDetail(area);
+}
+
+function renderMobileHome(area) {
+  const sectorOrder = ['黄金珠宝','家电','纺服','食品饮料','农业','美护','轻工','酒店旅游','户外装备','餐饮'];
+  const total = companies.length;
+
+  let cards = sectorOrder.map(s => {
+    const cs = companies.filter(c => c.sector === s);
+    const sum = sectorSummaries[s];
+    const dotColor = {
+      '黄金珠宝': '#C00000', '家电': '#003778', '纺服': '#2e7d9e', '食品饮料': '#27ae60',
+      '农业': '#e67e22', '美护': '#8e44ad', '轻工': '#c0392b', '酒店旅游': '#2980b9',
+      '户外装备': '#f39c12', '餐饮': '#e74c3c'
+    }[s] || '#003778';
+    const desc = sum ? sum.focus.split('；')[0] : '';
+    return `<div class="mh-card" onclick="goMobileSector('${s}')" style="border-top:3px solid ${dotColor}">
+      <div class="mh-card-name">${s}</div>
+      <div class="mh-card-sub">${desc}</div>
+      <div class="mh-card-count">${cs.length} 家公司</div>
+    </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="mobile-home">
+    <div class="mh-title">共 ${total} 家公司 · 点击行业查看公司详情</div>
+    <div class="mh-grid">${cards}</div>
+  </div>`;
+}
+
+function goMobileSector(sector) {
+  mobileState.mobileView = 'sector';
+  mobileState.mobileSector = sector;
+  renderMobileContent();
+}
+
+function goMobileHome() {
+  mobileState.mobileView = 'home';
+  mobileState.mobileSector = null;
+  renderMobileContent();
+}
+
+function renderMobileSector(area) {
+  const sector = mobileState.mobileSector;
+  if (!sector) { goMobileHome(); return; }
+  const cs = companies.filter(c => c.sector === sector);
+  const sm = sectorSummaries[sector];
+
+  const summaryHtml = sm ? `<div class="sector-summary">
+    <div class="ss-header"><span class="ss-title">${sector} · 行业概览</span></div>
+    <div class="ss-body">
+      <div class="ss-section"><span class="ss-label">行业情况</span><p>${sm.situation || ''}</p></div>
+      <div class="ss-section"><span class="ss-label">市场关注</span><p>${sm.focus || ''}</p></div>
+      <div class="ss-section"><span class="ss-label">催化关注</span><p>${sm.catalyst || ''}</p></div>
+    </div>
+  </div>` : '';
+
+  const cardsHtml = cs.map(c => {
+    const latestRec = c.records[0];
+    const m = latestRec ? latestRec.metrics : [];
+    const metricsSlice = m.slice(0, 4);
+    const metricsHtml = metricsSlice.length ? `<div class="ocard-metrics">${
+      metricsSlice.map(mi => `<div class="ocard-metric">
+        <div class="val ${mi ? mi.trend : 'neutral'}">${mi ? mi.val : '—'}</div>
+        <div class="lbl">${mi ? mi.label : ''}</div>
+      </div>`).join('')
+    }</div>` : '';
+    const tagsHtml = latestRec ? latestRec.tags.slice(0, 4).map(t => `<span class="ocard-tag ${t.includes('+') || t.includes('翻倍') ? 'hot' : 'up'}">${t}</span>`).join('') : '';
+    const dateStr = latestRec ? `${latestRec.date}` : '';
+    return `<div class="ocard" data-sector="${c.sector}" onclick="selectCompany('${c.id}');renderMobileDetail(document.getElementById('contentArea'))">
+      <div class="ocard-header">
+        <div><span class="ocard-name">${c.name}</span><span class="ocard-code">${c.code}</span></div>
+        <span class="dh-sector sector-${sectorShort(c.sector)}">${c.sector}</span>
+      </div>
+      <div class="ocard-sub">${c.sub}</div>
+      ${metricsHtml}
+      ${tagsHtml ? `<div class="ocard-tags">${tagsHtml}</div>` : ''}
+      <div class="ocard-latest">最新：${latestRec ? latestRec.title : ''}（${dateStr}）</div>
+    </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="mobile-sector-view active">
+    <button class="mobile-back-btn" onclick="goMobileHome()">${sector}</button>
+    ${summaryHtml}
+    <div class="grid">${cardsHtml}</div>
+  </div>`;
+}
+
+function renderMobileDetail(area) {
+  const c = state.selectedCompany;
+  if (!c) { goMobileHome(); return; }
+  const sKey = sectorShort(c.sector);
+  const latestRec = c.records[0];
+  const m = latestRec.metrics;
+  const groups = [
+    { title: "最新报告期", items: m.slice(0,4) },
+    { title: "关键指标", items: m.slice(4,8) },
+    { title: "其他", items: [m[8]] }
+  ];
+  const metricsHtml = `<div class="dh-metrics-wrap">${
+    groups.map(g => `
+      <div class="dh-group">
+        <div class="dh-group-title">${g.title}</div>
+        <div class="dh-group-cells">${
+          g.items.map(mi => `<div class="dh-metric"><div class="val ${mi ? mi.trend : 'neutral'}">${mi ? mi.val : '—'}</div><div class="lbl">${mi ? mi.label : ''}</div></div>`).join('')
+        }</div>
+      </div>`).join('')
+  }</div>`;
+
+  const timelineHtml = c.records.map(r => {
+    const tagsHtml = r.tags.map((t, i) => `<span class="tl-tag ${i < 2 ? 'hot' : 'up'}">${t}</span>`).join('');
+    return `<div class="tl-item">
+      <div class="tl-dot type-${r.type}"></div>
+      <div class="tl-header">
+        <span class="tl-date">${r.date}</span>
+        <span class="tl-type type-tag-${r.type}">${r.type}</span>
+        <span style="font-size:.8rem;font-weight:600;color:var(--text)">${r.title}</span>
+      </div>
+      <div class="tl-card">
+        <div class="tl-tags">${tagsHtml}</div>
+        <div class="tl-section"><div class="tl-section-title">📌 市场关注点</div><div class="tl-section-content">${r.focus}</div></div>
+        <div class="tl-section"><div class="tl-section-title">📊 核心亮点</div><div class="tl-section-content">${r.highlights}</div></div>
+        <div class="tl-section"><div class="tl-section-title">🎯 公司指引 & 展望</div><div class="tl-section-content">${r.guidance}</div></div>
+        <div class="tl-section"><div class="tl-section-title">💡 深度背景</div><div class="tl-section-content">${r.extra}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="mobile-sector-view active">
+    <button class="mobile-back-btn" onclick="goMobileSector('${c.sector}')">${c.sector}</button>
+    <div class="detail-header">
+      <select class="mobile-company-select" onchange="selectCompany(this.value);renderMobileDetail(document.getElementById('contentArea'));" style="display:block">
+        ${companies.filter(co => co.sector === c.sector).map(co => `<option value="${co.id}" ${co.id === c.id ? 'selected' : ''}>${co.name}（${co.code}）</option>`).join('')}
+      </select>
+      <div class="dh-row1">
+        <div><span class="dh-name">${c.name}</span><span class="dh-code">${c.code}</span></div>
+        <span class="dh-sector sector-${sKey}">${c.sector}</span>
+      </div>
+      <div class="dh-sub">${c.sub}</div>
+      ${metricsHtml}
+    </div>
+    <div class="timeline">
+      <div class="timeline-title">跟踪记录（${c.records.length} 条）</div>
+      ${timelineHtml}
+    </div>
+  </div>`;
+}
+
 
 // Error handling for debugging
 window.addEventListener('error', function(e) {
@@ -3332,8 +3478,7 @@ window.addEventListener('error', function(e) {
   document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
 });
 renderSidebar();
-renderMobileSectorBar();
-renderContent();
+renderMobileContent();
 </script>
 </body>
 </html>
