@@ -325,119 +325,121 @@
   /* ── 平板适配 ── */
   @media (max-width: 1024px) {
     .grid { grid-template-columns: 1fr; }
-    .topbar { padding: 12px 16px; }
-    .search-input { width: 160px; }
   }
 
-  /* ── 手机适配：顶部栏双行 + 抽屉侧边栏 ── */
+  /* ── 手机适配：无侧边栏 + 行业横滑条 + 公司下拉 ── */
   @media (max-width: 768px) {
-    .hamburger { display: flex; }
-    .topbar {
-      padding: 8px 12px;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
-    }
-    .topbar-left {
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-      min-width: 0;
-    }
-    .topbar h1 {
-      font-size: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-      min-width: 0;
-    }
-    .topbar .badge {
-      flex-shrink: 0;
-      font-size: 0.65rem;
-      padding: 2px 7px;
-      white-space: nowrap;
-    }
-    .topbar-right {
-      width: 100%;
-      justify-content: space-between;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .search-input {
-      flex: 1;
-      min-width: 0;
-      width: unset;
-      font-size: 0.78rem;
-      padding: 7px 12px;
-    }
-    .view-toggle { gap: 3px; flex-shrink: 0; }
-    .view-btn { padding: 6px 10px; font-size: 0.72rem; white-space: nowrap; }
-
-    /* 侧边栏 → 抽屉 */
-    .sidebar {
-      position: fixed; top: 0; left: 0; bottom: 0;
-      width: 280px; z-index: 160;
-      transform: translateX(-100%); transition: transform .3s ease;
-      box-shadow: 2px 0 20px rgba(0,0,0,.15);
-    }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-overlay.show { display: block; }
-
+    .hamburger { display: none !important; }
+    .sidebar, .sidebar-overlay { display: none !important; }
     .main-wrap { flex-direction: column; }
     .content { padding: 0; }
 
-    .detail-header { padding: 16px 14px 14px; position: static; }
+    /* 顶部栏单行紧凑 */
+    .topbar { padding: 8px 10px; }
+    .topbar-left { gap: 8px; }
+    .topbar h1 { font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .topbar .badge { font-size: 0.62rem; padding: 2px 6px; white-space: nowrap; flex-shrink: 0; }
+    .topbar-right { gap: 6px; }
+    .search-input { flex: 1; min-width: 0; width: unset; font-size: 0.75rem; padding: 6px 10px; }
+    .view-toggle { gap: 2px; flex-shrink: 0; }
+    .view-btn { padding: 5px 8px; font-size: 0.68rem; white-space: nowrap; }
+
+    /* 行业横滑条 */
+    .mobile-sector-bar {
+      display: flex !important;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 6px;
+      padding: 8px 10px;
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 60;
+    }
+    .mobile-sector-bar::-webkit-scrollbar { display: none; }
+    .ms-btn {
+      flex-shrink: 0;
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      background: #fff;
+      border: 1px solid var(--soft-border);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+    }
+    .ms-btn.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #fff;
+    }
+
+    /* 详情页公司下拉 */
+    .mobile-company-select {
+      display: none;
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--soft-border);
+      font-size: 0.82rem;
+      background: #fff;
+      color: var(--text);
+      font-family: KaiTi, STKaiti, '楷体', Arial, sans-serif;
+      margin-bottom: 12px;
+    }
+
+    .detail-header { padding: 14px 12px 12px; position: static; }
     .dh-row1 { flex-wrap: wrap; gap: 6px; }
-    .dh-name { font-size: 1.15rem; }
+    .dh-name { font-size: 1.1rem; }
     .dh-metrics-wrap { flex-direction: column; }
     .dh-group { border-right: none !important; border-bottom: 1px solid var(--soft-border); }
     .dh-group:last-child { border-bottom: none; }
 
-    .timeline { padding: 16px 14px 30px; }
-    .timeline-title { font-size: 0.72rem; margin-bottom: 12px; }
+    .timeline { padding: 14px 12px 30px; }
+    .timeline-title { font-size: 0.7rem; margin-bottom: 10px; }
+    .tl-item { padding-left: 24px; padding-bottom: 24px; }
     .tl-card { padding: 12px 14px; }
-    .tl-section-content { font-size: 0.78rem; }
+    .tl-section-content { font-size: 0.76rem; }
 
-    .overview-view { padding: 14px 12px 30px; }
-    .overview-title { font-size: 0.72rem; }
-    .grid { grid-template-columns: 1fr; gap: 10px; }
+    .overview-view { padding: 0; }
+    .overview-title { padding: 12px 12px 4px; font-size: 0.7rem; margin-bottom: 8px; }
+    .grid { grid-template-columns: 1fr; gap: 10px; padding: 0 10px 30px; }
     .ocard { padding: 14px; }
     .ocard-name { font-size: 0.9rem; }
     .ocard-metrics { flex-wrap: wrap; }
     .ocard-metric { min-width: 33.33%; padding: 6px 8px; }
-    .ocard-metric .val { font-size: 0.82rem; }
+    .ocard-metric .val { font-size: 0.8rem; }
 
     .compare-view { padding: 14px 10px 30px; }
-    .compare-header { margin-bottom: 12px; }
+    .compare-header { margin-bottom: 10px; }
     .compare-selects { flex-direction: column; align-items: stretch; }
     .compare-select { min-width: unset; width: 100%; }
-    .compare-table { font-size: 0.75rem; }
+    .compare-table { font-size: 0.72rem; }
     .compare-table th, .compare-table td { padding: 8px 10px; }
 
-    .ss-body { grid-template-columns: 1fr; gap: 10px; }
+    .ss-body { grid-template-columns: 1fr; gap: 10px; padding: 10px 12px; }
     .ss-header { padding: 8px 12px; }
-    .ss-title { font-size: 0.8rem; }
-    .ss-section p { font-size: 0.75rem; }
-    .ss-body { padding: 10px 12px; }
+    .ss-title { font-size: 0.78rem; }
+    .ss-section p { font-size: 0.74rem; }
 
-    .sf-btn { padding: 4px 8px; font-size: 0.65rem; }
-    .sidebar-filter { padding: 8px 10px; }
-
-    footer { padding: 10px; font-size: 0.65rem; }
+    footer { padding: 8px; font-size: 0.62rem; }
   }
 
   /* ── 小屏手机 ── */
   @media (max-width: 400px) {
-    .topbar h1 { font-size: 0.9rem; }
-    .view-btn { padding: 5px 7px; font-size: 0.68rem; }
+    .topbar h1 { font-size: 0.8rem; }
+    .view-btn { padding: 4px 6px; font-size: 0.64rem; }
     .dh-name { font-size: 1rem; }
-    .dh-metric { padding: 7px 5px; }
-    .dh-metric .val { font-size: 0.8rem; }
-    .ocard-metric .val { font-size: 0.75rem; }
-    .compare-table { font-size: 0.7rem; }
+    .dh-metric { padding: 6px 4px; }
+    .dh-metric .val { font-size: 0.76rem; }
+    .ocard-metric .val { font-size: 0.72rem; }
+    .compare-table { font-size: 0.68rem; }
     .compare-table th, .compare-table td { padding: 6px 8px; }
+    .ms-btn { padding: 4px 10px; font-size: 0.68rem; }
   }
 </style>
 </head>
@@ -445,9 +447,6 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <button class="hamburger" onclick="toggleSidebar()" aria-label="菜单">
-      <span></span><span></span><span></span>
-    </button>
     <h1>大消费行业跟踪看板</h1>
     <span class="badge" id="total-badge"></span>
   </div>
@@ -460,8 +459,6 @@
     </div>
   </div>
 </div>
-
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="main-wrap">
   <div class="sidebar">
@@ -481,7 +478,9 @@
     <div class="sidebar-list" id="sidebarList"></div>
   </div>
 
-  <div class="content" id="contentArea"></div>
+  <div class="content" id="contentArea">
+    <div class="mobile-sector-bar" id="mobileSectorBar" style="display:none;"></div>
+  </div>
 </div>
 
 <footer>数据来源于各公司公开调研纪要及业绩说明会，仅供研究参考，不构成投资建议。</footer>
@@ -3089,7 +3088,7 @@ function renderSidebar() {
     const active = state.selectedCompany && state.selectedCompany.id === c.id ? 'active' : '';
     const dotCls = 'dot-' + sectorShort(c.sector);
     const recCount = c.records.length;
-    return `<div class="sidebar-item ${active}" onclick="selectCompany('${c.id}');closeSidebar()">
+    return `<div class="sidebar-item ${active}" onclick="selectCompany('${c.id}')">
       <span class="si-dot ${dotCls}"></span>
       <div class="si-info">
         <div class="si-name">${c.name}</div>
@@ -3110,7 +3109,7 @@ function renderContent() {
 
 function renderDetailView(area) {
   const c = state.selectedCompany;
-  if (!c) { area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">请从左侧选择一家公司</div>'; return; }
+  if (!c) { area.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">请从总览页选择一家公司查看详情</div>'; return; }
   const sKey = sectorShort(c.sector);
   const latestRec = c.records[0];
   const m = latestRec.metrics;
@@ -3148,8 +3147,16 @@ function renderDetailView(area) {
     </div>`;
   }).join('');
 
+  const companyOpts = companies.map(c =>
+    `<option value="${c.id}" ${c.id === c.id ? '' : ''}>${c.name}（${c.code}）</option>`
+  ).join('');
+  const selectedId = c ? c.id : '';
+
   area.innerHTML = `<div class="detail-view active">
     <div class="detail-header">
+      <select class="mobile-company-select" onchange="selectCompany(this.value);renderContent();">
+        ${companies.map(co => `<option value="${co.id}" ${co.id === selectedId ? 'selected' : ''}>${co.name}（${co.code}）</option>`).join('')}
+      </select>
       <div class="dh-row1">
         <div>
           <span class="dh-name">${c.name}</span><span class="dh-code">${c.code}</span>
@@ -3262,15 +3269,8 @@ function renderCompare(area) {
 function selectCompany(id) {
   state.selectedCompany = companies.find(c => c.id === id);
   state.currentView = 'detail';
-
-// Error handling for debugging
-window.addEventListener('error', function(e) {
-  console.error('Global error:', e.message);
-  document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
-});
-renderSidebar();
-renderContent();
-  // Update view buttons to reflect switch
+  renderSidebar();
+  renderContent();
   document.querySelectorAll('.view-btn').forEach(b => {
     b.classList.remove('active');
     if (b.textContent.includes('详情')) b.classList.add('active');
@@ -3282,41 +3282,44 @@ function switchView(view, btn) {
   document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   else document.querySelectorAll('.view-btn').forEach(b => { if (b.textContent.includes(view === 'detail' ? '详情' : view === 'overview' ? '总览' : '对比')) b.classList.add('active'); });
+  renderMobileSectorBar();
   renderContent();
-}
-
-function toggleSidebar() {
-  document.getElementById('sidebarList').closest('.sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebarList').closest('.sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
 }
 
 function filterSector(sector, btn) {
   state.currentSector = sector;
   document.querySelectorAll('.sf-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-// Error handling for debugging
-window.addEventListener('error', function(e) {
-  console.error('Global error:', e.message);
-  document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
-});
-renderSidebar();
+  if (btn) btn.classList.add('active');
+  renderMobileSectorBar();
+  renderSidebar();
   if (state.currentView !== 'detail') renderContent();
+}
+
+function renderMobileSectorBar() {
+  const bar = document.getElementById('mobileSectorBar');
+  if (!bar) return;
+  bar.style.display = '';
+  const sectors = ['全部', '黄金珠宝', '家电', '纺服', '食品饮料', '农业', '美护', '轻工', '酒店旅游', '户外装备', '餐饮'];
+  bar.innerHTML = sectors.map(s =>
+    `<button class="ms-btn ${state.currentSector === (s === '全部' ? 'all' : s) ? 'active' : ''}" onclick="filterSectorMobile('${s === '全部' ? 'all' : s}',this)">${s}</button>`
+  ).join('');
+}
+
+function filterSectorMobile(sector, btn) {
+  state.currentSector = sector;
+  document.querySelectorAll('.sf-btn').forEach(b => {
+    const s = b.textContent === '全部' ? 'all' : b.textContent;
+    b.classList.toggle('active', s === sector);
+  });
+  document.querySelectorAll('.ms-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderSidebar();
+  renderContent();
 }
 
 function onSearch() {
   state.currentSearch = document.getElementById('searchInput').value.trim();
-  
-// Error handling for debugging
-window.addEventListener('error', function(e) {
-  console.error('Global error:', e.message);
-  document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
-});
-renderSidebar();
+  renderSidebar();
   if (state.currentView !== 'detail') renderContent();
 }
 
@@ -3337,6 +3340,7 @@ window.addEventListener('error', function(e) {
   document.getElementById('contentArea').innerHTML = '<div style="padding:20px;color:red">Error: ' + e.message + '</div>';
 });
 renderSidebar();
+renderMobileSectorBar();
 renderContent();
 </script>
 </body>
